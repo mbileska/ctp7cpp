@@ -62,7 +62,7 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
                 tmp_link_out[idx] = 0;
         }
 
-        ap_ufixed<10, 10> et_calo_ad[N_INPUT_1_1];
+        ap_uint<10> et_calo_ad[N_INPUT_1_1];
 #pragma HLS ARRAY_RESHAPE variable=et_calo_ad complete dim=0
         ap_ufixed<16, 8,AP_RND,AP_SAT,AP_SAT> layer8_out[N_LAYER_6];
 #pragma HLS ARRAY_PARTITION variable=layer8_out complete dim=0

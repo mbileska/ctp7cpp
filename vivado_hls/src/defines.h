@@ -16,7 +16,7 @@
 #define N_LAYER_6 1
 
 // hls-fpga-machine-learning insert layer-precision
-typedef ap_ufixed<10,10> input_t;
+typedef ap_uint<10> input_t;
 typedef ap_fixed<15,14> dense1_accum_t;
 typedef ap_fixed<14,13> layer2_t;
 typedef ap_fixed<2,1> weight2_t;
