@@ -9,30 +9,26 @@
 
 // hls-fpga-machine-learning insert numbers
 #define N_INPUT_1_1 252
-#define N_LAYER_2 15
-#define N_LAYER_2 15
-#define N_LAYER_2 15
-#define N_LAYER_6 1
-#define N_LAYER_6 1
+#define N_LAYER_2 16
+#define N_LAYER_2 16
+#define N_LAYER_5 1
+#define N_LAYER_5 1
 
 // hls-fpga-machine-learning insert layer-precision
-typedef ap_ufixed<10,10> input_t;
-typedef ap_fixed<15,14> dense1_accum_t;
-typedef ap_fixed<14,13> layer2_t;
-typedef ap_fixed<2,1> weight2_t;
-typedef ap_uint<1> bias2_t;
+typedef ap_uint<10> input_t;
+typedef ap_fixed<26,20> dense1_accum_t;
+typedef ap_fixed<26,20> layer2_t;
+typedef ap_fixed<8,2> weight2_t;
+typedef ap_fixed<8,4> bias2_t;
 typedef ap_uint<1> layer2_index;
-typedef ap_fixed<13,7,AP_RND,AP_SAT,AP_SAT> layer4_t;
-typedef ap_fixed<16,1> qbn1_scale_t;
-typedef ap_fixed<10,2> qbn1_bias_t;
-typedef ap_ufixed<5,2,AP_RND,AP_SAT,AP_SAT> layer5_t;
+typedef ap_ufixed<10,6,AP_RND_CONV,AP_SAT> layer4_t;
 typedef ap_fixed<18,8> relu1_table_t;
-typedef ap_fixed<22,16> output_accum_t;
-typedef ap_fixed<16,8> layer6_t;
-typedef ap_fixed<4,1> weight6_t;
-typedef ap_uint<1> bias6_t;
-typedef ap_uint<1> layer6_index;
-typedef ap_ufixed<16,8,AP_RND,AP_SAT,AP_SAT> result_t;
+typedef ap_fixed<26,14> dense2_accum_t;
+typedef ap_fixed<26,14> layer5_t;
+typedef ap_fixed<12,4> weight5_t;
+typedef ap_uint<1> bias5_t;
+typedef ap_uint<1> layer5_index;
+typedef ap_ufixed<16,8,AP_RND_CONV,AP_SAT> result_t;
 typedef ap_fixed<18,8> outputs_table_t;
 
 #endif

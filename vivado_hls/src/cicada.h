@@ -10,7 +10,7 @@
 // Prototype of top level function for C-synthesis
 void cicada(
     input_t inputs_[N_INPUT_1_1],
-    result_t layer8_out[N_LAYER_6]
+    result_t layer7_out[N_LAYER_5]
 );
 
 #endif
