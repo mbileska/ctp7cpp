@@ -62,10 +62,10 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
                 tmp_link_out[idx] = 0;
         }
 
-        ap_ufixed<10, 10> et_calo_ad[N_INPUT_1_1];
+        input_t et_calo_ad[N_INPUT_1_1];
 #pragma HLS ARRAY_RESHAPE variable=et_calo_ad complete dim=0
-        ap_ufixed<16, 8,AP_RND,AP_SAT,AP_SAT> layer8_out[N_LAYER_6];
-#pragma HLS ARRAY_PARTITION variable=layer8_out complete dim=0
+        result_t cicada_out[N_LAYER_10];
+#pragma HLS ARRAY_PARTITION variable=cicada_out complete dim=0
         region_t centr_region[NR_CNTR_REG];
 #pragma HLS ARRAY_PARTITION variable=centr_region complete dim=1
 
@@ -88,7 +88,7 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
         }
 
         // Anomlay detection algorithm
-        cicada(et_calo_ad, layer8_out);
+        cicada(et_calo_ad, cicada_out);
 
 ////////////////////////////////////////////////////////////
         // Objets from input
@@ -198,10 +198,10 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
         bitonicSort64(so_in_jet_boosted, so_out_jet_boosted);
 
         // Assign the algorithm outputs
-        tmp_link_out[0].range(31, 28) = layer8_out[0].range(15, 12);
-        tmp_link_out[0].range(63, 60) = layer8_out[0].range(11, 8);
-        tmp_link_out[0].range(95, 92) = layer8_out[0].range(7, 4);
-        tmp_link_out[0].range(127, 124) = layer8_out[0].range(3, 0);
+        tmp_link_out[0].range(31, 28) = cicada_out[0].range(15, 12);
+        tmp_link_out[0].range(63, 60) = cicada_out[0].range(11, 8);
+        tmp_link_out[0].range(95, 92) = cicada_out[0].range(7, 4);
+        tmp_link_out[0].range(127, 124) = cicada_out[0].range(3, 0);
 
         int word = 32;
         for (int idx = 0; idx < 6; idx++) {
