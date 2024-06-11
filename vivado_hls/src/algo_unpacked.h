@@ -5,6 +5,7 @@
 
 #define N_CH_IN 36
 #define N_CH_OUT 1
+#define NR_CNTR_REG (252)
 
 typedef struct
 {

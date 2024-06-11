@@ -12,6 +12,7 @@ void conv_2d_resource_cl(
     res_T res[CONFIG_T::out_height * CONFIG_T::out_width * CONFIG_T::n_filt],
     typename CONFIG_T::weight_t weights[CONFIG_T::filt_height * CONFIG_T::filt_width * CONFIG_T::n_chan * CONFIG_T::n_filt],
     typename CONFIG_T::bias_t biases[CONFIG_T::n_filt]) {
+    #pragma HLS latency max=4
     constexpr unsigned mult_n_in = CONFIG_T::filt_height * CONFIG_T::filt_width * CONFIG_T::n_chan;
     constexpr unsigned mult_n_out = CONFIG_T::n_filt;
     constexpr unsigned block_factor = DIV_ROUNDUP(mult_n_in * mult_n_out, CONFIG_T::reuse_factor);
@@ -26,6 +27,7 @@ void conv_2d_resource_cl(
 
     // Treating weights as 2d is required to make sure Vitis doesn't use urem cores to calculate indices.
     // Also, we don't apply ARRAY_RESHAPE pragma as Vitis figures this out on its own.
+//    #pragma HLS ARRAY_PARTITION variable=weights complete
     typename CONFIG_T::weight_t(*weights_2d)[CONFIG_T::reuse_factor] =
         (typename CONFIG_T::weight_t(*)[CONFIG_T::reuse_factor])weights;
 
@@ -39,7 +41,7 @@ void conv_2d_resource_cl(
 
 PartitionLoop:
     for (unsigned i_part = 0; i_part < CONFIG_T::n_partitions; i_part++) {
-        //#pragma HLS UNROLL // We don't want this loop unrolled
+//        #pragma HLS UNROLL // We don't want this loop unrolled
 
         CONFIG_T::template fill_buffer<data_T, CONFIG_T>::fill_buffer(data, data_buf, i_part);
 
