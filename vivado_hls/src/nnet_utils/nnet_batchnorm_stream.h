@@ -66,13 +66,7 @@ BinaryNormLoop:
     BatchNormPack:
         for (int j = 0; j < data_T::size; j++) {
             #pragma HLS UNROLL
-            int norm_index;
-            if (CONFIG_T::n_filt == -1) {
-                norm_index = i * data_T::size + j;
-            } else {
-                norm_index = j % CONFIG_T::n_filt;
-            }
-            out_data[j] = (in_data[j] >= threshold[norm_index]) ? 1 : 0;
+            out_data[j] = (in_data[j] > threshold[i * data_T::size + j]) ? 1 : 0;
         }
 
         res.write(out_data);
@@ -98,12 +92,7 @@ TernaryNormLoop:
         for (int j = 0; j < data_T::size; j++) {
             #pragma HLS UNROLL
 
-            int norm_index;
-            if (CONFIG_T::n_filt == -1) {
-                norm_index = i * data_T::size + j;
-            } else {
-                norm_index = j % CONFIG_T::n_filt;
-            }
+            int norm_index = i * data_T::size + j;
 
             if (in_data[j] > threshold_hi[norm_index]) {
                 out_data[j] = 1;
