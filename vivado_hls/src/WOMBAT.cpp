@@ -21,12 +21,12 @@ void WOMBAT(
         // hls-fpga-machine-learning insert load weights
         nnet::load_weights_from_txt<weight2_t, 288>(w2, "w2.txt");
         nnet::load_weights_from_txt<bias2_t, 32>(b2, "b2.txt");
-        nnet::load_weights_from_txt<batch_normalization_scale_t, 32>(s4, "s4.txt");
-        nnet::load_weights_from_txt<batch_normalization_bias_t, 32>(b4, "b4.txt");
+        nnet::load_weights_from_txt<norm_1_scale_t, 32>(s4, "s4.txt");
+        nnet::load_weights_from_txt<norm_1_bias_t, 32>(b4, "b4.txt");
         nnet::load_weights_from_txt<weight7_t, 18432>(w7, "w7.txt");
         nnet::load_weights_from_txt<bias7_t, 64>(b7, "b7.txt");
-        nnet::load_weights_from_txt<batch_normalization_1_scale_t, 64>(s9, "s9.txt");
-        nnet::load_weights_from_txt<batch_normalization_1_bias_t, 64>(b9, "b9.txt");
+        nnet::load_weights_from_txt<norm_2_scale_t, 64>(s9, "s9.txt");
+        nnet::load_weights_from_txt<norm_2_bias_t, 64>(b9, "b9.txt");
         nnet::load_weights_from_txt<weight13_t, 98304>(w13, "w13.txt");
         nnet::load_weights_from_txt<bias13_t, 128>(b13, "b13.txt");
         nnet::load_weights_from_txt<weight16_t, 512>(w16, "w16.txt");
