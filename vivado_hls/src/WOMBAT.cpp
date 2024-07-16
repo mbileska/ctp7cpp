@@ -46,35 +46,35 @@ void WOMBAT(
     #pragma HLS ARRAY_PARTITION variable=layer2_out complete dim=0
     nnet::conv_2d_cl<input_t, layer2_t, config2>(layer_in, layer2_out, w2, b2); // q_conv2d
 
-    // layer4_t layer4_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
-    // #pragma HLS ARRAY_PARTITION variable=layer4_out complete dim=0
-    // nnet::normalize<layer2_t, layer4_t, config4>(layer2_out, layer4_out, s4, b4); // batch_normalization
+    layer4_t layer4_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
+    #pragma HLS ARRAY_PARTITION variable=layer4_out complete dim=0
+    nnet::normalize<layer2_t, layer4_t, config4>(layer2_out, layer4_out, s4, b4); // batch_normalization
 
     layer5_t layer5_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
     #pragma HLS ARRAY_PARTITION variable=layer5_out complete dim=0
-    nnet::relu<layer4_t, layer5_t, relu_config5>(layer2_out, layer5_out); // q_activation
+    nnet::relu<layer4_t, layer5_t, relu_config5>(layer4_out, layer5_out); // q_activation
 
-    // layer6_t layer6_out[OUT_HEIGHT_6*OUT_WIDTH_6*N_FILT_6];
-    // #pragma HLS ARRAY_PARTITION variable=layer6_out complete dim=0
-    // nnet::pooling2d_cl<layer5_t, layer6_t, config6>(layer5_out, layer6_out); // average_pooling2d
+    layer6_t layer6_out[OUT_HEIGHT_6*OUT_WIDTH_6*N_FILT_6];
+    #pragma HLS ARRAY_PARTITION variable=layer6_out complete dim=0
+    nnet::pooling2d_cl<layer5_t, layer6_t, config6>(layer5_out, layer6_out); // average_pooling2d
 
     layer7_t layer7_out[OUT_HEIGHT_7*OUT_WIDTH_7*N_FILT_7];
     #pragma HLS ARRAY_PARTITION variable=layer7_out complete dim=0
-    nnet::conv_2d_cl<layer6_t, layer7_t, config7>(layer5_out, layer7_out, w7, b7); // q_conv2d_1
+    nnet::conv_2d_cl<layer6_t, layer7_t, config7>(layer6_out, layer7_out, w7, b7); // q_conv2d_1
 
-    // layer9_t layer9_out[OUT_HEIGHT_7*OUT_WIDTH_7*N_FILT_7];
-    // #pragma HLS ARRAY_PARTITION variable=layer9_out complete dim=0
-    // nnet::normalize<layer7_t, layer9_t, config9>(layer7_out, layer9_out, s9, b9); // batch_normalization_1
+    layer9_t layer9_out[OUT_HEIGHT_7*OUT_WIDTH_7*N_FILT_7];
+    #pragma HLS ARRAY_PARTITION variable=layer9_out complete dim=0
+    nnet::normalize<layer7_t, layer9_t, config9>(layer7_out, layer9_out, s9, b9); // batch_normalization_1
 
     layer10_t layer10_out[OUT_HEIGHT_7*OUT_WIDTH_7*N_FILT_7];
     #pragma HLS ARRAY_PARTITION variable=layer10_out complete dim=0
-    nnet::relu<layer9_t, layer10_t, relu_config10>(layer7_out, layer10_out); // q_activation_1
+    nnet::relu<layer9_t, layer10_t, relu_config10>(layer9_out, layer10_out); // q_activation_1
 
-    // layer11_t layer11_out[OUT_HEIGHT_11*OUT_WIDTH_11*N_FILT_11];
-    // #pragma HLS ARRAY_PARTITION variable=layer11_out complete dim=0
-    // nnet::pooling2d_cl<layer10_t, layer11_t, config11>(layer10_out, layer11_out); // average_pooling2d_1
+    layer11_t layer11_out[OUT_HEIGHT_11*OUT_WIDTH_11*N_FILT_11];
+    #pragma HLS ARRAY_PARTITION variable=layer11_out complete dim=0
+    nnet::pooling2d_cl<layer10_t, layer11_t, config11>(layer10_out, layer11_out); // average_pooling2d_1
 
-    auto& layer12_out = layer10_out;
+    auto& layer12_out = layer11_out;
     layer13_t layer13_out[N_LAYER_13];
     #pragma HLS ARRAY_PARTITION variable=layer13_out complete dim=0
     nnet::dense<layer11_t, layer13_t, config13>(layer12_out, layer13_out, w13, b13); // q_dense
