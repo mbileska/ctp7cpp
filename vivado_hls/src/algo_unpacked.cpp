@@ -77,7 +77,7 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
         }
 
         // Anomlay detection algorithm
-        //WOMBAT(et_calo_ad, WOMBAT_out);
+        WOMBAT(et_calo_ad, WOMBAT_out);
 
         // Assign the algorithm outputs
         //tmp_link_out[0].range(31, 28) = WOMBAT_out[0].range(15, 12);
