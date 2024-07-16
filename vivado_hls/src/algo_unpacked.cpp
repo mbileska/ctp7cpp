@@ -9,8 +9,9 @@
 #include <iomanip>
 #include <string>
 
-#include "cicada.h"
+#include "WOMBAT.h"
 #include "algo_unpacked.h"
+//#include "defines.h"
 
 const uint16_t NRegionsPerLink = 7; // Bits 8-21, 22-39, 40-55,..., 104-119, keeping ranges (7, 0) and (127, 120) unused
 const uint16_t MaxRegions = N_CH_IN * NRegionsPerLink;
@@ -57,10 +58,10 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
                 tmp_link_out[idx] = 0;
         }
 
-        input_t et_calo_ad[N_INPUT_1_1];
+        input_t et_calo_ad[N_INPUT_1_1*N_INPUT_2_1*N_INPUT_3_1];
 #pragma HLS ARRAY_RESHAPE variable=et_calo_ad complete dim=0
-        result_t cicada_out[N_LAYER_10];
-#pragma HLS ARRAY_RESHAPE variable=cicada_out complete dim=0
+        result_t WOMBAT_out[N_LAYER_16];
+#pragma HLS ARRAY_RESHAPE variable=WOMBAT_out complete dim=0
 
         regionLoop: for(int iRegion = 0; iRegion < NR_CNTR_REG; iRegion++) {
 #pragma HLS UNROLL
@@ -76,14 +77,14 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
         }
 
         // Anomlay detection algorithm
-        cicada(et_calo_ad, cicada_out);
+        //WOMBAT(et_calo_ad, WOMBAT_out);
 
         // Assign the algorithm outputs
-        tmp_link_out[0].range(31, 28) = cicada_out[0].range(15, 12);
-        tmp_link_out[0].range(63, 60) = cicada_out[0].range(11, 8);
-        tmp_link_out[0].range(95, 92) = cicada_out[0].range(7, 4);
-        tmp_link_out[0].range(127, 124) = cicada_out[0].range(3, 0);
-
+        //tmp_link_out[0].range(31, 28) = WOMBAT_out[0].range(15, 12);
+        //tmp_link_out[0].range(63, 60) = WOMBAT_out[0].range(11, 8);
+        //tmp_link_out[0].range(95, 92) = WOMBAT_out[0].range(7, 4);
+        //tmp_link_out[0].range(127, 124) = WOMBAT_out[0].range(3, 0);
+        tmp_link_out[0].range(1,0) = 0x1;
         for(int i = 0; i < N_CH_OUT; i++){
 #pragma HLS unroll
                 link_out[i] = tmp_link_out[i];
