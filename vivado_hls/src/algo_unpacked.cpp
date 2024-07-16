@@ -58,7 +58,7 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
                 tmp_link_out[idx] = 0;
         }
 
-        input_t et_calo_ad[N_INPUT_1_1*N_INPUT_2_1*N_INPUT_3_1];
+        input_t et_calo_ad[N_INPUT_1_1];
 #pragma HLS ARRAY_RESHAPE variable=et_calo_ad complete dim=0
         result_t WOMBAT_out[N_LAYER_16];
 #pragma HLS ARRAY_RESHAPE variable=WOMBAT_out complete dim=0
@@ -80,11 +80,12 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
         WOMBAT(et_calo_ad, WOMBAT_out);
 
         // Assign the algorithm outputs
-        //tmp_link_out[0].range(31, 28) = WOMBAT_out[0].range(15, 12);
-        //tmp_link_out[0].range(63, 60) = WOMBAT_out[0].range(11, 8);
-        //tmp_link_out[0].range(95, 92) = WOMBAT_out[0].range(7, 4);
-        //tmp_link_out[0].range(127, 124) = WOMBAT_out[0].range(3, 0);
-        tmp_link_out[0].range(1,0) = 0x1;
+        tmp_link_out[0].range(31, 28) = WOMBAT_out[0].range(15, 12);
+        tmp_link_out[0].range(63, 60) = WOMBAT_out[0].range(11, 8);
+        tmp_link_out[0].range(95, 92) = WOMBAT_out[0].range(7, 4);
+        tmp_link_out[0].range(127, 124) = WOMBAT_out[0].range(3, 0);
+        //tmp_link_out[0].range(1,0) = 0x1;
+
         for(int i = 0; i < N_CH_OUT; i++){
 #pragma HLS unroll
                 link_out[i] = tmp_link_out[i];
