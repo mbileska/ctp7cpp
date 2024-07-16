@@ -329,7 +329,7 @@ void global_pooling2d_cl(data_T data[CONFIG_T::in_height * CONFIG_T::in_width * 
     #pragma HLS PIPELINE II=CONFIG_T::reuse_factor
 
     const int limit = pool_op_limit<CONFIG_T>();
-    #pragma HLS ALLOCATION instances=pool_op limit=limit function
+//    #pragma HLS ALLOCATION instances=pool_op limit=limit function
 
 FiltLoop:
     for (int filt = 0; filt < CONFIG_T::n_filt; filt++) {
