@@ -185,7 +185,7 @@ struct config7 : nnet::conv2d_config {
     static const unsigned n_partitions = 63;
     static const unsigned n_pixels = out_height * out_width / n_partitions;
     template<class data_T, class CONFIG_T>
-    using fill_buffer = nnet::fill_buffer_7<data_T, CONFIG_T>;
+    using fill_buffer = nnet::fill_buffer_2<data_T, CONFIG_T>; // OG 7
     typedef model_default_t accum_t;
     typedef bias7_t bias_t;
     typedef weight7_t weight_t;
