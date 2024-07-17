@@ -1,15 +1,15 @@
-//Numpy array shape [4]
-//Min -0.015625000000
-//Max 0.062500000000
-//Number of zeros 0
+//Numpy array shape [16]
+//Min 0.000000000000
+//Max 0.250000000000
+//Number of zeros 1
 
 #ifndef B8_H_
 #define B8_H_
 
 #ifndef __SYNTHESIS__
-bias8_t b8[4];
+bias8_t b8[16];
 #else
-bias8_t b8[4] = {0.062500, -0.015625, 0.062500, 0.062500};
+bias8_t b8[16] = {0.25, 0.25, 0.25, 0.00, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25};
 #endif
 
 #endif
