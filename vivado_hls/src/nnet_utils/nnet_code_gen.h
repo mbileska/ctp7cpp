@@ -1,5 +1,7 @@
 #ifndef NNET_INSTR_GEN_H_
 #define NNET_INSTR_GEN_H_
+#define DEFAULT_PARTITION 0
+
 
 #include "nnet_helpers.h"
 #include <iostream>
@@ -32,7 +34,7 @@ class fill_buffer_2 : public FillConv2DBuffer<data_T, CONFIG_T> {
     static void fill_buffer(
         data_T data[CONFIG_T::in_height * CONFIG_T::in_width * CONFIG_T::n_chan],
         data_T buffer[CONFIG_T::n_pixels][CONFIG_T::filt_height * CONFIG_T::filt_width * CONFIG_T::n_chan],
-        const unsigned partition
+        const unsigned partition = DEFAULT_PARTITION
     ) {
         if (partition ==   0) {
             buffer[0][0] =    data[0]; buffer[0][1] =    data[1]; buffer[0][2] =   data[14]; buffer[0][3] =   data[15];
