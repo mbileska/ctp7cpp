@@ -166,35 +166,6 @@ def build_model():
     
     return model
 
-# def build_model():
-#     ### MODEL D2
-#     input_layer = Input(shape=(18, 14, 1), name="inputs")
-    
-#     x = Lambda(lambda x: x - 30.0, name="shift_1")(input_layer)
-
-#     ## Convolutional layers
-#     x = QConv2D(20, (3, 3), strides=1, padding='same', kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="conv2d_1")(x)
-#     x = BatchNormalization(name="norm_1")(x)
-#     x = QActivation('quantized_relu(8)', name="relu_1")(x)
-    
-#     x = AveragePooling2D((2, 2), name="pool_1")(x)
-    
-#     x = QConv2D(30, (3, 3), strides=1, padding='same', kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="conv2d_2")(x)
-#     x = BatchNormalization(name="norm_2")(x)
-#     x = QActivation('quantized_relu(8)', name="relu_2")(x)
-
-#     x = Flatten(name="flatten_1")(x)
-#     x = QDense(80, activation="quantized_relu(8)", kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="latent")(x)
-#     x = QDense(4, kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="dense_1")(x)
-#     x = QActivation('quantized_relu(8)', name="relu_3")(x)
-
-#     output_layer = QDense(4, kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1))(x)
-    
-#     model = Model(inputs=input_layer, outputs=output_layer)
-#     model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
-
-#     return model
-
 
 def custom_mse_with_heavy_penalty(y_true, y_pred, threshold=1.0, penalty_factor=1.5):
     y_true = tf.cast(y_true, tf.float32)
@@ -209,17 +180,6 @@ def custom_mse_with_heavy_penalty(y_true, y_pred, threshold=1.0, penalty_factor=
     combined_residuals = tf.where(K.abs(residual) < threshold, small_residuals, large_residuals)
     
     return K.mean(combined_residuals)
-
-# def custom_huber_loss(y_true, y_pred):
-    # delta = 1.0
-    # y_true = tf.cast(y_true, tf.float32)
-    # error = y_true - y_pred
-    # is_small_error = tf.abs(error) <= delta
-    # big_error_loss = tf.square(error) *2
-    # small_error_loss = tf.square(error) / 2
-    # # penalized_big_error_loss = big_error_loss * 2 
-    # return tf.where(is_small_error, small_error_loss, big_error_loss)
-
 
 class LossHistory(Callback):
     def __init__(self, save_path):
