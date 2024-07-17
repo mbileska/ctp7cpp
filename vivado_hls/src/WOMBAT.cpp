@@ -19,11 +19,11 @@ void WOMBAT(
     static bool loaded_weights = false;
     if (!loaded_weights) {
         // hls-fpga-machine-learning insert load weights
-        nnet::load_weights_from_txt<weight2_t, 72>(w2, "w2.txt");
-        nnet::load_weights_from_txt<bias2_t, 8>(b2, "b2.txt");
-        nnet::load_weights_from_txt<norm_1_scale_t, 8>(s4, "s4.txt");
-        nnet::load_weights_from_txt<norm_1_bias_t, 8>(b4, "b4.txt");
-        nnet::load_weights_from_txt<weight8_t, 8064>(w8, "w8.txt");
+        nnet::load_weights_from_txt<weight2_t, 36>(w2, "w2.txt");
+        nnet::load_weights_from_txt<bias2_t, 4>(b2, "b2.txt");
+        nnet::load_weights_from_txt<norm_1_scale_t, 4>(s4, "s4.txt");
+        nnet::load_weights_from_txt<norm_1_bias_t, 4>(b4, "b4.txt");
+        nnet::load_weights_from_txt<weight8_t, 4032>(w8, "w8.txt");
         nnet::load_weights_from_txt<bias8_t, 16>(b8, "b8.txt");
         nnet::load_weights_from_txt<weight11_t, 64>(w11, "w11.txt");
         nnet::load_weights_from_txt<bias11_t, 4>(b11, "b11.txt");
