@@ -32,7 +32,7 @@ void WOMBAT(
         // nnet::load_weights_from_txt<weight16_t, 512>(w16, "w16.txt");
         // nnet::load_weights_from_txt<bias16_t, 4>(b16, "b16.txt");
         // loaded_weights = true;
-        load_weights_from_txt<weight2_t, 36>(w2, "w2.txt");
+        nnet::load_weights_from_txt<weight2_t, 36>(w2, "w2.txt");
         nnet::load_weights_from_txt<bias2_t, 4>(b2, "b2.txt");
         nnet::load_weights_from_txt<norm_1_scale_t, 4>(s4, "s4.txt");
         nnet::load_weights_from_txt<norm_1_bias_t, 4>(b4, "b4.txt");
