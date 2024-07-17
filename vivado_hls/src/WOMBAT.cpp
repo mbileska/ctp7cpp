@@ -18,7 +18,7 @@ void WOMBAT(
 #ifndef __SYNTHESIS__
     static bool loaded_weights = false;
     if (!loaded_weights) {
-        hls-fpga-machine-learning insert load weights
+        // hls-fpga-machine-learning insert load weights
         nnet::load_weights_from_txt<weight2_t, 288>(w2, "w2.txt");
         nnet::load_weights_from_txt<bias2_t, 32>(b2, "b2.txt");
         nnet::load_weights_from_txt<norm_1_scale_t, 32>(s4, "s4.txt");
