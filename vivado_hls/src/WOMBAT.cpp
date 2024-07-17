@@ -12,7 +12,7 @@ void WOMBAT(
     #pragma HLS INLINE
 //    #pragma HLS INTERFACE ap_vld port=input_2 
 	//    #pragma HLS ARRAY_RESHAPE variable=input_2 complete dim=0
-    //#pragma HLS ARRAY_PARTITION variable=layer16_out complete dim=0
+    // #pragma HLS ARRAY_PARTITION variable=layer16_out complete dim=0
 
 
 #ifndef __SYNTHESIS__
@@ -41,10 +41,10 @@ void WOMBAT(
 
     // hls-fpga-machine-learning insert layers
 
-    auto& layer_in = input_2;
+    // auto& layer_in = input_2;
     layer2_t layer2_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
     #pragma HLS ARRAY_PARTITION variable=layer2_out complete dim=0
-    nnet::conv_2d_cl<input_t, layer2_t, config2>(layer_in, layer2_out, w2, b2); // q_conv2d
+    nnet::conv_2d_cl<input_t, layer2_t, config2>(input_2, layer2_out, w2, b2); // q_conv2d
 
     layer4_t layer4_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
     #pragma HLS ARRAY_PARTITION variable=layer4_out complete dim=0
