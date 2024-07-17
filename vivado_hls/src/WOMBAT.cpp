@@ -9,10 +9,11 @@ void WOMBAT(
 ) {
 
     // hls-fpga-machine-learning insert IO
-    #pragma HLS ARRAY_RESHAPE variable=inputs complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=layer11_out complete dim=0
-    #pragma HLS INTERFACE ap_vld port=inputs,layer11_out 
-    #pragma HLS DATAFLOW 
+    #pragma HLS INLINE
+    // #pragma HLS ARRAY_RESHAPE variable=inputs complete dim=0
+    // #pragma HLS ARRAY_PARTITION variable=layer11_out complete dim=0
+    // #pragma HLS INTERFACE ap_vld port=inputs,layer11_out 
+    // #pragma HLS DATAFLOW 
 
 #ifndef __SYNTHESIS__
     static bool loaded_weights = false;
