@@ -27,7 +27,7 @@
 #define N_SIZE_0_7 252
 #define N_LAYER_8 16
 #define N_LAYER_8 16
-#define N_LAYER_11 2
+#define N_LAYER_16 2
 
 // hls-fpga-machine-learning insert layer-precision
 typedef ap_uint<10> input_t;
