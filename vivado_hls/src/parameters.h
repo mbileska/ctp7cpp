@@ -156,46 +156,46 @@ struct config7_mult : nnet::dense_config {
     using product = nnet::product::mult<x_T, y_T>;
 };
 
-struct config7 : nnet::conv2d_config {
-    static const unsigned pad_top = 1;
-    static const unsigned pad_bottom = 1;
-    static const unsigned pad_left = 1;
-    static const unsigned pad_right = 1;
-    static const unsigned in_height = 9;
-    static const unsigned in_width = 7;
-    static const unsigned n_chan = 32;
-    static const unsigned filt_height = 3;
-    static const unsigned filt_width = 3;
-    static const unsigned kernel_size = filt_height * filt_width;
-    static const unsigned n_filt = 64;
-    static const unsigned stride_height = 1;
-    static const unsigned stride_width = 1;
-    static const unsigned out_height = 9;
-    static const unsigned out_width = 7;
-    static const unsigned reuse_factor = 2;
-    static const unsigned n_zeros = 122;
-    static const unsigned multiplier_limit =
-        DIV_ROUNDUP(kernel_size * n_chan * n_filt, reuse_factor) - n_zeros / reuse_factor;
-    static const bool store_weights_in_bram = false;
-    static const unsigned strategy = nnet::resource;
-    static const nnet::conv_implementation implementation = nnet::conv_implementation::linebuffer;
-    static const unsigned min_height = 9;
-    static const unsigned min_width = 7;
-    static const ap_uint<filt_height * filt_width> pixels[min_height * min_width];
-    static const unsigned n_partitions = 63;
-    static const unsigned n_pixels = out_height * out_width / n_partitions;
-    template<class data_T, class CONFIG_T>
-    using fill_buffer = nnet::fill_buffer_2<data_T, CONFIG_T>; // OG 7
-    typedef model_default_t accum_t;
-    typedef bias7_t bias_t;
-    typedef weight7_t weight_t;
-    typedef config7_mult mult_config;
-    template<unsigned K, unsigned S, unsigned W>
-    using scale_index_height = nnet::scale_index_unscaled<K, S, W>;
-    template<unsigned K, unsigned S, unsigned W>
-    using scale_index_width = nnet::scale_index_unscaled<K, S, W>;
-};
-const ap_uint<config7::filt_height * config7::filt_width> config7::pixels[] = {0};
+// struct config7 : nnet::conv2d_config {
+//     static const unsigned pad_top = 1;
+//     static const unsigned pad_bottom = 1;
+//     static const unsigned pad_left = 1;
+//     static const unsigned pad_right = 1;
+//     static const unsigned in_height = 9;
+//     static const unsigned in_width = 7;
+//     static const unsigned n_chan = 32;
+//     static const unsigned filt_height = 3;
+//     static const unsigned filt_width = 3;
+//     static const unsigned kernel_size = filt_height * filt_width;
+//     static const unsigned n_filt = 64;
+//     static const unsigned stride_height = 1;
+//     static const unsigned stride_width = 1;
+//     static const unsigned out_height = 9;
+//     static const unsigned out_width = 7;
+//     static const unsigned reuse_factor = 2;
+//     static const unsigned n_zeros = 122;
+//     static const unsigned multiplier_limit =
+//         DIV_ROUNDUP(kernel_size * n_chan * n_filt, reuse_factor) - n_zeros / reuse_factor;
+//     static const bool store_weights_in_bram = false;
+//     static const unsigned strategy = nnet::resource;
+//     static const nnet::conv_implementation implementation = nnet::conv_implementation::linebuffer;
+//     static const unsigned min_height = 9;
+//     static const unsigned min_width = 7;
+//     static const ap_uint<filt_height * filt_width> pixels[min_height * min_width];
+//     static const unsigned n_partitions = 63;
+//     static const unsigned n_pixels = out_height * out_width / n_partitions;
+//     template<class data_T, class CONFIG_T>
+//     using fill_buffer = nnet::fill_buffer_7<data_T, CONFIG_T>; 
+//     typedef model_default_t accum_t;
+//     typedef bias7_t bias_t;
+//     typedef weight7_t weight_t;
+//     typedef config7_mult mult_config;
+//     template<unsigned K, unsigned S, unsigned W>
+//     using scale_index_height = nnet::scale_index_unscaled<K, S, W>;
+//     template<unsigned K, unsigned S, unsigned W>
+//     using scale_index_width = nnet::scale_index_unscaled<K, S, W>;
+// };
+// const ap_uint<config7::filt_height * config7::filt_width> config7::pixels[] = {0};
 
 // norm_2
 struct config9 : nnet::batchnorm_config {
