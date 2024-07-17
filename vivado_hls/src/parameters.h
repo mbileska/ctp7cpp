@@ -60,7 +60,7 @@ struct config2 : nnet::conv2d_config {
     static const unsigned filt_height = 3;
     static const unsigned filt_width = 3;
     static const unsigned kernel_size = filt_height * filt_width;
-    static const unsigned n_filt = 32;
+    static const unsigned n_filt = 4;//32;
     static const unsigned stride_height = 1;
     static const unsigned stride_width = 1;
     static const unsigned out_height = 18;
@@ -93,7 +93,7 @@ const ap_uint<config2::filt_height * config2::filt_width> config2::pixels[] = {0
 // norm_1
 struct config4 : nnet::batchnorm_config {
     static const unsigned n_in = OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2;
-    static const unsigned n_filt = 32;
+    static const unsigned n_filt = 4;//32;
     static const unsigned n_scale_bias = (n_filt == -1) ? n_in : n_filt;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned reuse_factor = 2;
@@ -118,7 +118,7 @@ struct relu_config5 : nnet::activ_config {
 struct config6 : nnet::pooling2d_config {
     static const unsigned in_height = 18;
     static const unsigned in_width = 14;
-    static const unsigned n_filt = 32;
+    static const unsigned n_filt = 4;//32;
     static const unsigned stride_height = 2;
     static const unsigned stride_width = 2;
     static const unsigned pool_height = 2;
@@ -200,7 +200,7 @@ struct config7_mult : nnet::dense_config {
 // norm_2
 struct config9 : nnet::batchnorm_config {
     static const unsigned n_in = OUT_HEIGHT_7*OUT_WIDTH_7*N_FILT_7;
-    static const unsigned n_filt = 64;
+    static const unsigned n_filt = 4;//64;
     static const unsigned n_scale_bias = (n_filt == -1) ? n_in : n_filt;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned reuse_factor = 2;
@@ -225,7 +225,7 @@ struct relu_config10 : nnet::activ_config {
 struct config11 : nnet::pooling2d_config {
     static const unsigned in_height = 9;
     static const unsigned in_width = 7;
-    static const unsigned n_filt = 64;
+    static const unsigned n_filt = 4;//64;
     static const unsigned stride_height = 2;
     static const unsigned stride_width = 2;
     static const unsigned pool_height = 2;
