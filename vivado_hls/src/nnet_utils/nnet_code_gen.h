@@ -27,7 +27,7 @@ template <class data_T, typename CONFIG_T> class FillConv2DBuffer {
 
 // hls4ml insert code
 template<class data_T, typename CONFIG_T>
-class fill_buffer_3 : public FillConv2DBuffer<data_T, CONFIG_T> {
+class fill_buffer_2 : public FillConv2DBuffer<data_T, CONFIG_T> {
     public:
     static void fill_buffer(
         data_T data[CONFIG_T::in_height * CONFIG_T::in_width * CONFIG_T::n_chan],
