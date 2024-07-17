@@ -9,10 +9,10 @@ void WOMBAT(
 ) {
 
     // hls-fpga-machine-learning insert IO
-    // #pragma HLS ARRAY_RESHAPE variable=inputs complete dim=0
-    // #pragma HLS ARRAY_PARTITION variable=layer11_out complete dim=0
-    // #pragma HLS INTERFACE ap_vld port=inputs,layer11_out 
-    // #pragma HLS DATAFLOW 
+   // #pragma HLS ARRAY_RESHAPE variable=inputs complete dim=0
+  //  #pragma HLS ARRAY_PARTITION variable=layer11_out complete dim=0
+  //  #pragma HLS INTERFACE ap_vld port=inputs,layer11_out 
+   // #pragma HLS DATAFLOW 
     #pragma HLS INLINE
 
 #ifndef __SYNTHESIS__
@@ -25,8 +25,8 @@ void WOMBAT(
         nnet::load_weights_from_txt<norm_1_bias_t, 4>(b4, "b4.txt");
         nnet::load_weights_from_txt<weight8_t, 4032>(w8, "w8.txt");
         nnet::load_weights_from_txt<bias8_t, 16>(b8, "b8.txt");
-        nnet::load_weights_from_txt<weight11_t, 32>(w11, "w11.txt");
-        nnet::load_weights_from_txt<bias11_t, 2>(b11, "b11.txt");
+        nnet::load_weights_from_txt<weight11_t, 64>(w11, "w11.txt");
+        nnet::load_weights_from_txt<bias11_t, 4>(b11, "b11.txt");
         loaded_weights = true;
     }
 #endif
