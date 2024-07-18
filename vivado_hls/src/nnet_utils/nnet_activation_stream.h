@@ -62,27 +62,27 @@ ReLUActLoop:
 // *************************************************
 //       RELU30 Activation
 // *************************************************
-template <class data_T, class res_T, typename CONFIG_T> void relu30(hls::stream<data_T> &data, hls::stream<res_T> &res) {
-ReLU30ActLoop:
-    for (int i = 0; i < CONFIG_T::n_in / res_T::size; i++) {
-        #pragma HLS PIPELINE
+// template <class data_T, class res_T, typename CONFIG_T> void relu30(hls::stream<data_T> &data, hls::stream<res_T> &res) {
+// ReLU30ActLoop:
+//     for (int i = 0; i < CONFIG_T::n_in / res_T::size; i++) {
+//         #pragma HLS PIPELINE
 
-        data_T in_data = data.read();
-        res_T out_data;
-        PRAGMA_DATA_PACK(out_data)
+//         data_T in_data = data.read();
+//         res_T out_data;
+//         PRAGMA_DATA_PACK(out_data)
 
-    ReLU30PackLoop:
-        for (int j = 0; j < res_T::size; j++) {
-            #pragma HLS UNROLL
-            if (in_data[j] < 30)
-                out_data[j] = 0;
-            else
-                out_data[j] = in_data[j]-30;
-        }
+//     ReLU30PackLoop:
+//         for (int j = 0; j < res_T::size; j++) {
+//             #pragma HLS UNROLL
+//             if (in_data[j] < 30)
+//                 out_data[j] = 0;
+//             else
+//                 out_data[j] = in_data[j]-30;
+//         }
 
-        res.write(out_data);
-    }
-}
+//         res.write(out_data);
+//     }
+// }
 
 // *************************************************
 //       Sigmoid Activation
