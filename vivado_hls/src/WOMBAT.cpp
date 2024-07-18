@@ -37,9 +37,13 @@ void WOMBAT(
 
     // hls-fpga-machine-learning insert layers
 
+    layer1_t layer1_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
+    #pragma HLS ARRAY_PARTITION variable=layer1_out complete dim=0
+    nnet::relu<inputs, layer1_t, relu_config5>(inputs, layer1_out); // relu30_1
+
     layer2_t layer2_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
     #pragma HLS ARRAY_PARTITION variable=layer2_out complete dim=0
-    nnet::conv_2d_cl<input_t, layer2_t, config2>(inputs, layer2_out, w2, b2); // conv_1
+    nnet::conv_2d_cl<layer1_out, layer2_t, config2>(layer1_out, layer2_out, w2, b2); // conv_1
 
     layer4_t layer4_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
     #pragma HLS ARRAY_PARTITION variable=layer4_out complete dim=0
