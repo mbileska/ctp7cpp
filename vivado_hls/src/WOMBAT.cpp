@@ -39,7 +39,7 @@ void WOMBAT(
 
     layer1_t layer1_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
     #pragma HLS ARRAY_PARTITION variable=layer1_out complete dim=0
-    nnet::relu<inputs, layer1_t, relu_config5>(inputs, layer1_out); // relu30_1
+    nnet::relu30<inputs, layer1_t, relu_config5>(inputs, layer1_out); // relu30_1
 
     layer2_t layer2_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
     #pragma HLS ARRAY_PARTITION variable=layer2_out complete dim=0
