@@ -132,6 +132,7 @@ from hls4ml.model.optimizer import OptimizerPass, register_pass
 from tensorflow.keras import backend as K
 from tensorflow.keras.utils import custom_object_scope
 from tensorflow.keras.layers import Layer
+from hls4ml.converters.keras_to_hls import keras_handler, parse_default_keras_layer
 
 # Define custom loss function
 def custom_mse_with_heavy_penalty(y_true, y_pred, threshold=1.0, penalty_factor=1.5):
@@ -168,6 +169,14 @@ class Subtract30ReLU(Layer):
     def get_config(self):
         return super().get_config()
 
+# Register the custom layer handler
+@keras_handler('Subtract30ReLU')
+def parse_Subtract30ReLU_layer(keras_layer, input_names, input_shapes, data_reader):
+    layer = parse_default_keras_layer(keras_layer, input_names, input_shapes, data_reader)
+    layer['class_name'] = 'Subtract30ReLU'
+    layer['activation'] = 'linear'
+    return layer
+
 def get_hls_config(keras_model, strategy="Latency"):
     hls_config = hls4ml.utils.config_from_keras_model(keras_model, granularity="name")
     hls_config["Model"]["Strategy"] = strategy
@@ -179,7 +188,7 @@ def get_hls_config(keras_model, strategy="Latency"):
     hls_config["LayerName"][input_layer_name]["Precision"]["result"] = "ap_uint<10>"
 
     # Example: Manually set the precision for the custom layer
-    hls_config["LayerName"]["subtract30_re_lu"]["Precision"]["result"] = "ap_fixed<16,6>"
+    hls_config["LayerName"]["relu30_1"]["Precision"]["result"] = "ap_fixed<16,6>"
 
     conv_layers = ["conv_1", "conv_2"]
     for layer in conv_layers:
@@ -194,7 +203,7 @@ def get_hls_config(keras_model, strategy="Latency"):
         hls_config["LayerName"][layer]["Precision"]["bias"] = "ap_fixed<8,1>"
         hls_config["LayerName"][layer]["Precision"]["result"] = "ap_fixed<16,6>"
 
-    activation_layers = ["relu_1", "relu_2", "relu30_1"]
+    activation_layers = ["relu_1", "relu_2"]
     for layer in activation_layers:
         hls_config["LayerName"][layer]["Precision"]["result"] = "ap_fixed<16,6>"
 
@@ -229,7 +238,7 @@ def main() -> None:
 
     # Load pre-trained QKeras model with custom loss function in scope
     with custom_object_scope({'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU}):
-        keras_model = tf.keras.models.load_model("modelReducedUWU_epochs10_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU})
+        keras_model = tf.keras.models.load_model("modelSkeleton_epochs500_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU})
 
     # Compile the Keras model with the custom loss function
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
