@@ -36,10 +36,20 @@ template <class data_T, class res_T, typename CONFIG_T> void linear(data_T data[
 // *************************************************
 //       RELU Activation
 // *************************************************
-template <class data_T, class res_T, typename CONFIG_T> void relu(data_T data[CONFIG_T::n_in], res_T res[CONFIG_T::n_in]) {
+template <class data_T, class res_T, typename CONFIG_T> void relu(data_T data[CONFIG_T::n_in], res_T res[CONFIG_T::n_in], int inp = 0) {
     #pragma HLS PIPELINE
-
     data_T datareg;
+
+    if(inp==1){
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+        datareg = data[ii];
+        if (datareg < 0)
+            res[ii] = 0;
+        else
+            res[ii] = datareg - 30;
+    }
+    }else{
+
     for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
         datareg = data[ii];
         if (datareg > 0)
@@ -47,6 +57,8 @@ template <class data_T, class res_T, typename CONFIG_T> void relu(data_T data[CO
         else
             res[ii] = 0;
     }
+    }
+    
 }
 
 template <class data_T, class res_T, int MAX_INT, typename CONFIG_T>

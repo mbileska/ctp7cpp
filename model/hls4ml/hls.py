@@ -61,7 +61,7 @@ def get_hls_config(keras_model, strategy="Latency"):
         hls_config["LayerName"][layer]["Precision"]["bias"] = "ap_fixed<8,1>"
         hls_config["LayerName"][layer]["Precision"]["result"] = "ap_fixed<16,6>"
 
-    activation_layers = ["relu_1", "relu_2", "relu_3"]
+    activation_layers = ["relu_1", "relu_2", "relu30_1"]
     for layer in activation_layers:
         hls_config["LayerName"][layer]["Precision"]["result"] = "ap_fixed<16,6>"
 
@@ -98,7 +98,7 @@ def main() -> None:
 
     # Load pre-trained QKeras model with custom loss function in scope
     with custom_object_scope({'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty}):
-        keras_model = tf.keras.models.load_model("modelTrue_epochs500_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
+        keras_model = tf.keras.models.load_model("modelSkeleton_epochs500_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
 
     # Compile the Keras model with the custom loss function
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
