@@ -175,8 +175,9 @@ def remove_custom_layer(keras_model, custom_layer_name):
     x = inputs[0]
     for layer in keras_model.layers:
         if layer.name == custom_layer_name:
-            continue
-        x = layer(x)
+            x = layer.input
+        else:
+            x = layer(x)
     new_model = Model(inputs=inputs, outputs=x)
     return new_model
 
