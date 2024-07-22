@@ -136,7 +136,7 @@ def main() -> None:
 
     # Remove custom layer before converting to HLS model
     # keras_model_no_custom_layer = remove_custom_layer(keras_model, 'padding_1', target_shape=(20, 14, 1))
-    keras_model_no_custom_layer = remove_custom_layer(keras_model_no_custom_layer, 'relu30_1')
+    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'relu30_1')
 
 
 
