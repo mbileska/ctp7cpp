@@ -62,7 +62,8 @@ class Subtract30ReLU(Layer):
         return super().get_config()
 
 def remove_custom_layer(keras_model, custom_layer_name):
-    inputs = keras_model.input
+    input_shape = keras_model.input_shape[1:]  
+    inputs = Input(shape=input_shape)
     x = inputs
     for layer in keras_model.layers:
         if layer.name == custom_layer_name:
