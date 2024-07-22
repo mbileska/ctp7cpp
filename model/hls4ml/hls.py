@@ -131,8 +131,8 @@ from hls4ml.model.layers import Activation as ActivationHLS
 from hls4ml.model.optimizer import OptimizerPass, register_pass
 from tensorflow.keras import backend as K
 from tensorflow.keras.utils import custom_object_scope
-from tensorflow.keras.layers import Layer
-from hls4ml.converters.keras_to_hls import keras_handler, parse_default_keras_layer
+from tensorflow.keras.layers import Layer, Input
+from tensorflow.keras.models import Model, load_model
 
 # Define custom loss function
 def custom_mse_with_heavy_penalty(y_true, y_pred, threshold=1.0, penalty_factor=1.5):
@@ -169,13 +169,16 @@ class Subtract30ReLU(Layer):
     def get_config(self):
         return super().get_config()
 
-# Register the custom layer handler
-@keras_handler('Subtract30ReLU')
-def parse_Subtract30ReLU_layer(keras_layer, input_names, input_shapes, data_reader):
-    layer = parse_default_keras_layer(keras_layer, input_names, input_shapes, data_reader)
-    layer['class_name'] = 'Subtract30ReLU'
-    layer['activation'] = 'linear'
-    return layer
+def remove_custom_layer(keras_model, custom_layer_name):
+    # Create a new model without the custom layer
+    inputs = keras_model.inputs
+    x = inputs[0]
+    for layer in keras_model.layers:
+        if layer.name == custom_layer_name:
+            continue
+        x = layer(x)
+    new_model = Model(inputs=inputs, outputs=x)
+    return new_model
 
 def get_hls_config(keras_model, strategy="Latency"):
     hls_config = hls4ml.utils.config_from_keras_model(keras_model, granularity="name")
@@ -186,9 +189,6 @@ def get_hls_config(keras_model, strategy="Latency"):
 
     input_layer_name = keras_model.layers[0].name
     hls_config["LayerName"][input_layer_name]["Precision"]["result"] = "ap_uint<10>"
-
-    # Example: Manually set the precision for the custom layer
-    hls_config["LayerName"]["relu30_1"]["Precision"]["result"] = "ap_fixed<16,6>"
 
     conv_layers = ["conv_1", "conv_2"]
     for layer in conv_layers:
@@ -203,7 +203,7 @@ def get_hls_config(keras_model, strategy="Latency"):
         hls_config["LayerName"][layer]["Precision"]["bias"] = "ap_fixed<8,1>"
         hls_config["LayerName"][layer]["Precision"]["result"] = "ap_fixed<16,6>"
 
-    activation_layers = ["relu_1", "relu_2"]
+    activation_layers = ["relu_1", "relu_2", "relu30_1"]
     for layer in activation_layers:
         hls_config["LayerName"][layer]["Precision"]["result"] = "ap_fixed<16,6>"
 
@@ -243,11 +243,14 @@ def main() -> None:
     # Compile the Keras model with the custom loss function
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
 
+    # Remove custom layer before converting to HLS model
+    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'subtract30_re_lu')
+
     # Generate hls4ml config
-    hls_config = get_hls_config(keras_model, strategy="Latency")
+    hls_config = get_hls_config(keras_model_no_custom_layer, strategy="Latency")
 
     # Generate hls4ml model
-    hls_model = convert_to_hls4ml_model(keras_model, hls_config)
+    hls_model = convert_to_hls4ml_model(keras_model_no_custom_layer, hls_config)
 
     hls_model.write()
 
