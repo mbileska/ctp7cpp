@@ -13,7 +13,20 @@ from tensorflow.keras.utils import custom_object_scope
 from tensorflow.keras.layers import Layer, Input
 from tensorflow.keras.models import Model, load_model
 
-# Define custom loss function
+
+class CircularPadding2D(Layer):
+    def __init__(self, padding=(1, 1), **kwargs):
+        self.padding = padding
+        super(CircularPadding2D, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        pad_height, pad_width = self.padding
+        padded_inputs = tf.concat([inputs[:, :, -pad_height:], inputs, inputs[:, :, :pad_height]], axis=2)
+        return padded_inputs
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], input_shape[1], input_shape[2] + 2 * self.padding[0], input_shape[3])
+
 def custom_mse_with_heavy_penalty(y_true, y_pred, threshold=1.0, penalty_factor=1.5):
     y_true = tf.cast(y_true, tf.float32)
     y_pred = tf.cast(y_pred, tf.float32)
@@ -60,7 +73,6 @@ def remove_custom_layer(keras_model, custom_layer_name):
     new_model = Model(inputs=inputs, outputs=x)
     return new_model
 
-
 def get_hls_config(keras_model, strategy="Latency"):
     hls_config = hls4ml.utils.config_from_keras_model(keras_model, granularity="name")
     hls_config["Model"]["Strategy"] = strategy
@@ -104,18 +116,7 @@ def convert_to_hls4ml_model(keras_model, hls_config):
     )
     hls_model.compile()
     return hls_model
-class CircularPadding2D(Layer):
-    def __init__(self, padding=(1, 1), **kwargs):
-        self.padding = padding
-        super(CircularPadding2D, self).__init__(**kwargs)
 
-    def call(self, inputs):
-        pad_height, pad_width = self.padding
-        padded_inputs = tf.concat([inputs[:, :, -pad_height:], inputs, inputs[:, :, :pad_height]], axis=2)
-        return padded_inputs
-
-    def compute_output_shape(self, input_shape):
-        return (input_shape[0], input_shape[1], input_shape[2] + 2 * self.padding[0], input_shape[3])
 def main() -> None:
     # Workaround for linear activation layer removal
     hls4ml.model.flow.flow.update_flow(
@@ -135,7 +136,7 @@ def main() -> None:
     # Compile the Keras model with the custom loss function
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
 
-    # Remove custom layers before converting to HLS model
+    # Remove custom layer before converting to HLS model
     keras_model_no_custom_layer = remove_custom_layer(keras_model, 'relu30_1')
     keras_model_no_custom_layer = remove_custom_layer(keras_model, 'padding_1')
 
