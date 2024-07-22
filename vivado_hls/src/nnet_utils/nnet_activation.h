@@ -43,7 +43,7 @@ template <class data_T, class res_T, typename CONFIG_T> void relu(data_T data[CO
     if(inp==1){
     for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
         datareg = data[ii];
-        if (datareg < 0)
+        if (datareg < 30)
             res[ii] = 0;
         else
             res[ii] = datareg - 30;

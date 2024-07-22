@@ -45,7 +45,7 @@ def load_data(file_path):
         genPhi = f['genPhi_1'][:]
         genEta = f['genEta_1'][:]
         cregionsMetrics = f['cregions'][:]#cregions - 30.0
-        cregionsMetrics[cregionsMetrics < 0] = 0.0
+        # cregionsMetrics[cregionsMetrics < 0] = 0.0
     return cregions, genPhi, genEta, cregionsMetrics
 
 
