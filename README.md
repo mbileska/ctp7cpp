@@ -1,4 +1,4 @@
-# CICADA Project
+# WOMBAT Project
 ---
 ![logo](assets/WOMBATlogoMini.png)
 
