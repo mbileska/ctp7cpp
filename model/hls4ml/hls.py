@@ -203,7 +203,7 @@ def get_hls_config(keras_model, strategy="Latency"):
         hls_config["LayerName"][layer]["Precision"]["bias"] = "ap_fixed<8,1>"
         hls_config["LayerName"][layer]["Precision"]["result"] = "ap_fixed<16,6>"
 
-    activation_layers = ["relu_1", "relu_2", "relu30_1"]
+    activation_layers = ["relu_1", "relu_2"]
     for layer in activation_layers:
         hls_config["LayerName"][layer]["Precision"]["result"] = "ap_fixed<16,6>"
 
@@ -244,7 +244,7 @@ def main() -> None:
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
 
     # Remove custom layer before converting to HLS model
-    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'subtract30_re_lu')
+    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'relu30_1')
 
     # Generate hls4ml config
     hls_config = get_hls_config(keras_model_no_custom_layer, strategy="Latency")
