@@ -48,7 +48,7 @@ def get_hls_config(keras_model, strategy="Latency"):
 
     # hls_config["LayerName"]["subtract30_re_lu"]["Precision"]["result"] = "ap_fixed<16,6>"
 
-    conv_layers = ["conv_1", "conv_2"]
+    conv_layers = ["conv_1"]
     for layer in conv_layers:
         hls_config["LayerName"][layer]["Precision"]["weight"] = "ap_fixed<8,1>"
         hls_config["LayerName"][layer]["Precision"]["bias"] = "ap_fixed<8,1>"
