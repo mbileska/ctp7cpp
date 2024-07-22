@@ -83,7 +83,7 @@ struct config3 : nnet::conv2d_config {
     static const unsigned n_partitions = 3;
     static const unsigned n_pixels = out_height * out_width / n_partitions;
     template<class data_T, class CONFIG_T>
-    using fill_buffer = nnet::fill_buffer_3<data_T, CONFIG_T>;
+    using fill_buffer = nnet::fill_buffer_2<data_T, CONFIG_T>;
     typedef model_default_t accum_t;
     typedef bias3_t bias_t;
     typedef weight3_t weight_t;
