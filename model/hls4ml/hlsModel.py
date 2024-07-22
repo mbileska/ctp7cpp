@@ -115,7 +115,18 @@ def convert_to_hls4ml_model(keras_model, hls_config):
     )
     hls_model.compile()
     return hls_model
+class CircularPadding2D(Layer):
+    def __init__(self, padding=(1, 1), **kwargs):
+        self.padding = padding
+        super(CircularPadding2D, self).__init__(**kwargs)
 
+    def call(self, inputs):
+        pad_height, pad_width = self.padding
+        padded_inputs = tf.concat([inputs[:, :, -pad_height:], inputs, inputs[:, :, :pad_height]], axis=2)
+        return padded_inputs
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], input_shape[1], input_shape[2] + 2 * self.padding[0], input_shape[3])
 def main() -> None:
     # Workaround for linear activation layer removal
     hls4ml.model.flow.flow.update_flow(
