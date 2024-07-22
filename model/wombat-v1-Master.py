@@ -167,12 +167,12 @@ class CircularPadding2D(Layer):
         super(CircularPadding2D, self).__init__(**kwargs)
 
     def call(self, inputs):
-        pad_height, pad_width = self.padding
-        padded_inputs = tf.concat([inputs[:, :, -pad_height:], inputs, inputs[:, :, :pad_height]], axis=2)
+        pad_width, pad_height = self.padding
+        padded_inputs = tf.concat([inputs[:, -pad_width:], inputs, inputs[:, :pad_width]], axis=1)
         return padded_inputs
 
     def compute_output_shape(self, input_shape):
-        return (input_shape[0], input_shape[1], input_shape[2] + 2 * self.padding[0], input_shape[3])
+        return (input_shape[0], input_shape[1] + 2 * self.padding[0], input_shape[2], input_shape[3])
 
 
 def build_model():

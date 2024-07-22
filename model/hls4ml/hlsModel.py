@@ -14,18 +14,18 @@ from tensorflow.keras.layers import Layer, Input, Reshape
 from tensorflow.keras.models import Model, load_model
 
 
-class CircularPadding2D(Layer):
-    def __init__(self, padding=(1, 1), **kwargs):
-        self.padding = padding
-        super(CircularPadding2D, self).__init__(**kwargs)
+# class CircularPadding2D(Layer):
+#     def __init__(self, padding=(1, 1), **kwargs):
+#         self.padding = padding
+#         super(CircularPadding2D, self).__init__(**kwargs)
 
-    def call(self, inputs):
-        pad_width, pad_height = self.padding
-        padded_inputs = tf.concat([inputs[:, -pad_width:], inputs, inputs[:, :pad_width]], axis=1)
-        return padded_inputs
+#     def call(self, inputs):
+#         pad_width, pad_height = self.padding
+#         padded_inputs = tf.concat([inputs[:, -pad_width:], inputs, inputs[:, :pad_width]], axis=1)
+#         return padded_inputs
 
-    def compute_output_shape(self, input_shape):
-        return (input_shape[0], input_shape[1] + 2 * self.padding[0], input_shape[2], input_shape[3])
+#     def compute_output_shape(self, input_shape):
+#         return (input_shape[0], input_shape[1] + 2 * self.padding[0], input_shape[2], input_shape[3])
 
 def custom_mse_with_heavy_penalty(y_true, y_pred, threshold=1.0, penalty_factor=1.5):
     y_true = tf.cast(y_true, tf.float32)
@@ -61,18 +61,13 @@ class Subtract30ReLU(Layer):
     def get_config(self):
         return super().get_config()
 
-def remove_custom_layer(keras_model, custom_layer_name, target_shape=None):
-    input_shape = keras_model.input_shape[1:]  
-    inputs = Input(shape=(input_shape))
+def remove_custom_layer(keras_model, custom_layer_name):
+    inputs = keras_model.input
     x = inputs
     for layer in keras_model.layers:
         if layer.name == custom_layer_name:
             continue
         x = layer(x)
-    
-    if target_shape is not None:
-        x = Reshape(target_shape)(x)
-    
     new_model = Model(inputs=inputs, outputs=x)
     return new_model
 
@@ -133,16 +128,15 @@ def main() -> None:
     )
 
     # Load pre-trained QKeras model with custom loss function in scope
-    with custom_object_scope({'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D':CircularPadding2D}):
-        keras_model = tf.keras.models.load_model("modelApprentice_epochs10_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU,'CircularPadding2D':CircularPadding2D})
+    with custom_object_scope({'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU}):
+        keras_model = tf.keras.models.load_model("modelApprentice_epochs10_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU})
 
     # Compile the Keras model with the custom loss function
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
 
     # Remove custom layer before converting to HLS model
-    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'relu30_1')
-
-    keras_model_no_custom_layer = remove_custom_layer(keras_model_no_custom_layer, 'padding_1', target_shape=(20, 14, 1))
+    # keras_model_no_custom_layer = remove_custom_layer(keras_model, 'padding_1', target_shape=(20, 14, 1))
+    keras_model_no_custom_layer = remove_custom_layer(keras_model_no_custom_layer, 'relu30_1')
 
 
 
