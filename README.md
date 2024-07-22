@@ -1,6 +1,6 @@
 # CICADA Project
 ---
-![logo](assets/WOMBATlogo.png)
+![logo](assets/WOMBATlogoMini.png)
 
 ---
 A wombat, of the family Vombatidae, known for its burrowing prowess, efficiently uncovers hidden structures beneath the surface. 
