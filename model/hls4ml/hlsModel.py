@@ -62,14 +62,12 @@ class Subtract30ReLU(Layer):
         return super().get_config()
 
 def remove_custom_layer(keras_model, custom_layer_name):
-    # Create a new model without the custom layer
-    inputs = keras_model.inputs
-    x = inputs[0]
+    inputs = keras_model.input
+    x = inputs
     for layer in keras_model.layers:
         if layer.name == custom_layer_name:
-            x = layer.input
-        else:
-            x = layer(x)
+            continue
+        x = layer(x)
     new_model = Model(inputs=inputs, outputs=x)
     return new_model
 
