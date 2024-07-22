@@ -26,27 +26,43 @@ def load_data(file_path):
 def calculate_labels(cregions, genPhi, genEta):
     labels = []
 
-
     for img, phi, eta in zip(cregions, genPhi, genEta):
         heatmap = img.reshape((18, 14))
-        sums = np.array([[np.sum(heatmap[i:i+3, j:j+3]) for j in range(heatmap.shape[1]-2)] for i in range(heatmap.shape[0]-2)])
-        largest_index = np.argmax(sums)
-        largest = np.unravel_index(largest_index, sums.shape)
-        
-        # Cast sums to float for setting -np.inf
-        sums = sums.astype(float)
-        sums[max(0, largest[0]-2):min(sums.shape[0], largest[0]+3), max(0, largest[1]-2):min(sums.shape[1], largest[1]+3)] = -np.inf
 
-        # Find the largest 3x3 grid within 3 units from (genPhi, genEta)
-        phi_min, phi_max = int(max(0, phi - 3)), int(min(sums.shape[0], phi + 3))
+        # Summing with wrap-around for the phi dimension
+        sums = np.array([
+            [np.sum(heatmap[i:i + 3, j:j + 3]) for j in range(heatmap.shape[1] - 2)]
+            for i in range(heatmap.shape[0] - 2)
+        ])
+        
+        # Find the largest 3x3 grid within ±3 units from (genPhi, genEta) with wrap-around in phi
+        phi_min, phi_max = int(phi - 3), int(phi + 3)
         eta_min, eta_max = int(max(0, eta - 3)), int(min(sums.shape[1], eta + 3))
-        
-        second_largest_region = sums[phi_min:phi_max, eta_min:eta_max]
-        second_largest_index = np.argmax(second_largest_region)
-        second_largest_relative = np.unravel_index(second_largest_index, second_largest_region.shape)
-        second_largest = (second_largest_relative[0] + phi_min, second_largest_relative[1] + eta_min)
 
-        labels.append([largest[0]+1, largest[1]+1, second_largest[0]+1, second_largest[1]+1])
+        # Handle wrap-around in phi dimension
+        if phi_min < 0 or phi_max >= 18:
+            # Create a wrapped-around region for phi
+            sums_wrapped = np.concatenate((sums[phi_min:], sums[:phi_max % 18 + 1]), axis=0)
+            phi_min_wrapped = phi_min % 18
+            phi_max_wrapped = (phi_max % 18) + sums_wrapped.shape[0] - (phi_max % 18 + 1)
+        else:
+            sums_wrapped = sums[phi_min:phi_max + 1]
+            phi_min_wrapped = phi_min
+            phi_max_wrapped = phi_max
+
+        # Restrict to eta range
+        sums_restricted = sums_wrapped[:, eta_min:eta_max + 1]
+
+        # Find the largest 3x3 region within the restricted area
+        largest_index = np.argmax(sums_restricted)
+        largest_relative = np.unravel_index(largest_index, sums_restricted.shape)
+        largest = (largest_relative[0] + phi_min_wrapped, largest_relative[1] + eta_min)
+
+        # Handle wrap-around adjustment in phi dimension for the final coordinates
+        largest = (largest[0] % 18, largest[1])
+        
+        labels.append([largest[0] + 1, largest[1] + 1])
+
     return np.array(labels)
 
 def evaluate_model(predictions, labels, save_path):
