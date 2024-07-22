@@ -129,7 +129,7 @@ def main() -> None:
 
     # Load pre-trained QKeras model with custom loss function in scope
     with custom_object_scope({'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU}):
-        keras_model = tf.keras.models.load_model("modelApprentice_epochs10_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU})
+        keras_model = tf.keras.models.load_model("modelApprentice_epochs100_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU})
 
     # Compile the Keras model with the custom loss function
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
