@@ -10,7 +10,7 @@ from hls4ml.model.layers import Activation as ActivationHLS
 from hls4ml.model.optimizer import OptimizerPass, register_pass
 from tensorflow.keras import backend as K
 from tensorflow.keras.utils import custom_object_scope
-from tensorflow.keras.layers import Layer, Input
+from tensorflow.keras.layers import Layer, Input, Reshape
 from tensorflow.keras.models import Model, load_model
 
 
@@ -61,14 +61,18 @@ class Subtract30ReLU(Layer):
     def get_config(self):
         return super().get_config()
 
-def remove_custom_layer(keras_model, custom_layer_name):
+def remove_custom_layer(keras_model, custom_layer_name, target_shape=None):
     input_shape = keras_model.input_shape[1:]  
-    inputs = Input(shape=(18,14,1))
+    inputs = Input(shape=(input_shape))
     x = inputs
     for layer in keras_model.layers:
         if layer.name == custom_layer_name:
             continue
         x = layer(x)
+    
+    if target_shape is not None:
+        x = Reshape(target_shape)(x)
+    
     new_model = Model(inputs=inputs, outputs=x)
     return new_model
 
@@ -136,8 +140,9 @@ def main() -> None:
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
 
     # Remove custom layer before converting to HLS model
-    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'relu30_1')
-    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'padding_1')
+    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'padding_1', target_shape=(20, 14, 1))
+    keras_model_no_custom_layer = remove_custom_layer(keras_model_no_custom_layer, 'relu30_1')
+
 
 
     # Generate hls4ml config
