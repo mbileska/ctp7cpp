@@ -161,10 +161,28 @@ class Subtract30ReLU(Layer):
     def get_config(self):
         return super().get_config()
 
+class CircularPadding2D(Layer):
+    def __init__(self, padding=(1, 1), **kwargs):
+        self.padding = padding
+        super(CircularPadding2D, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        pad_height, pad_width = self.padding
+        padded_inputs = tf.concat([inputs[:, :, -pad_height:], inputs, inputs[:, :, :pad_height]], axis=2)
+        return padded_inputs
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], input_shape[1], input_shape[2] + 2 * self.padding[0], input_shape[3])
+
+
 def build_model():
     input_tensor = Input(shape=(18, 14, 1), name="inputs")
     x = input_tensor
-    
+
+    x = Subtract30ReLU(name="relu30_1")(x)
+
+    x = CircularPadding2D(padding=(1, 0), name="padding_1")(x)
+
     x = Conv2D(16, (3, 3), padding='same', name="conv_1")(x)
     x = BatchNormalization(name="norm_1")(x)
     x = Activation('relu', name="relu_1")(x)
@@ -274,7 +292,7 @@ def main():
     batch_size = args.batch_size
 
 
-    save_path = f'metrics/modelMaster_epochs{num_epochs}_batch{batch_size}'
+    save_path = f'metrics/modelMaster30_epochs{num_epochs}_batch{batch_size}'
     os.makedirs(save_path, exist_ok=True)
 
     cregionsl, genPhi, genEta, cregions = load_data(file_path)

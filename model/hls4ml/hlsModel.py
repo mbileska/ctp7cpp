@@ -60,17 +60,6 @@ def remove_custom_layer(keras_model, custom_layer_name):
     new_model = Model(inputs=inputs, outputs=x)
     return new_model
 
-def remove_custom_layer_by_class(keras_model, custom_layer_class):
-    # Create a new model without the custom layer class
-    inputs = keras_model.inputs
-    x = inputs[0]
-    for layer in keras_model.layers:
-        if isinstance(layer, custom_layer_class):
-            x = layer.input
-        else:
-            x = layer(x)
-    new_model = Model(inputs=inputs, outputs=x)
-    return new_model
 
 def get_hls_config(keras_model, strategy="Latency"):
     hls_config = hls4ml.utils.config_from_keras_model(keras_model, granularity="name")
@@ -141,14 +130,15 @@ def main() -> None:
 
     # Load pre-trained QKeras model with custom loss function in scope
     with custom_object_scope({'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D':CircularPadding2D}):
-        keras_model = tf.keras.models.load_model("modelApprentice_epochs100_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU,'CircularPadding2D':CircularPadding2D})
+        keras_model = tf.keras.models.load_model("modelApprentice_epochs10_batch32/model", custom_objects={'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty, 'Subtract30ReLU': Subtract30ReLU,'CircularPadding2D':CircularPadding2D})
 
     # Compile the Keras model with the custom loss function
     keras_model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
 
     # Remove custom layers before converting to HLS model
     keras_model_no_custom_layer = remove_custom_layer(keras_model, 'relu30_1')
-    keras_model_no_custom_layer = remove_custom_layer_by_class(keras_model_no_custom_layer, CircularPadding2D)
+    keras_model_no_custom_layer = remove_custom_layer(keras_model, 'padding_1')
+
 
     # Generate hls4ml config
     hls_config = get_hls_config(keras_model_no_custom_layer, strategy="Latency")

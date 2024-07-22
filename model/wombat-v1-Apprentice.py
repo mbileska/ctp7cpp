@@ -8,7 +8,6 @@ from keras.optimizers import Adam
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Conv2D,ZeroPadding2D, Cropping2D, Layer, BatchNormalization, PReLU, AveragePooling2D, Concatenate, Flatten, Dense, Dropout, Lambda, Subtract
 from tensorflow.keras.callbacks import Callback, EarlyStopping
-# from qkeras import QConv2D, QDense, QActivation, QDenseBatchnorm
 from qkeras.qlayers import QActivation
 from qkeras.quantizers import quantized_bits
 from tensorflow.keras import backend as K
@@ -160,18 +159,32 @@ class Subtract30ReLU(Layer):
     
     def get_config(self):
         return super().get_config()
+class CircularPadding2D(Layer):
+    def __init__(self, padding=(1, 1), **kwargs):
+        self.padding = padding
+        super(CircularPadding2D, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        pad_height, pad_width = self.padding
+        padded_inputs = tf.concat([inputs[:, :, -pad_height:], inputs, inputs[:, :, :pad_height]], axis=2)
+        return padded_inputs
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], input_shape[1], input_shape[2] + 2 * self.padding[0], input_shape[3])
+
 
 def build_model():
     input_tensor = Input(shape=(18, 14, 1), name="inputs")
-    x=input_tensor
-
+    x = input_tensor
 
     x = Subtract30ReLU(name="relu30_1")(x)
+
+    x = CircularPadding2D(padding=(1, 0), name="padding_1")(x)
+
     x = QConv2D(4, (3, 3), strides=(1, 1), padding='same', kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="conv_1")(x)
 
     x = BatchNormalization(name="norm_1")(x)
     x = QActivation('quantized_relu(quantized_bits(8, 1, 1, alpha=1))', name="relu_1")(x)
-
     
     x = AveragePooling2D((2, 2), name="pool_1")(x)
 
