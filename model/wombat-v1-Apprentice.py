@@ -159,18 +159,28 @@ class Subtract30ReLU(Layer):
     
     def get_config(self):
         return super().get_config()
-# class CircularPadding2D(Layer):
-#     def __init__(self, padding=(1, 1), **kwargs):
-#         self.padding = padding
-#         super(CircularPadding2D, self).__init__(**kwargs)
 
-#     def call(self, inputs):
-#         pad_width, pad_height = self.padding
-#         padded_inputs = tf.concat([inputs[:, -pad_width:], inputs, inputs[:, :pad_width]], axis=1)
-#         return padded_inputs
+class CircularPadding2D(Layer):
+    def __init__(self, padding=(1, 0), **kwargs):
+        self.padding = padding
+        super(CircularPadding2D, self).__init__(**kwargs)
 
-#     def compute_output_shape(self, input_shape):
-#         return (input_shape[0], input_shape[1] + 2 * self.padding[0], input_shape[2], input_shape[3])
+    def call(self, inputs):
+        pad_height, pad_width = self.padding
+        input_shape = tf.shape(inputs)
+
+        if pad_height > 0:
+            top_pad = inputs[:, -pad_height:, :, :]
+            bottom_pad = inputs[:, :pad_height, :, :]
+            middle_section = inputs[:, pad_height:-pad_height, :, :]
+            padded_inputs = tf.concat([top_pad, middle_section, bottom_pad], axis=1)
+        else:
+            padded_inputs = inputs
+
+        return padded_inputs
+
+    def compute_output_shape(self, input_shape):
+        return input_shape
 
 
 
@@ -179,15 +189,18 @@ def build_model():
     x = input_tensor
 
     x = Subtract30ReLU(name="relu30_1")(x)
+    x = ZeroPadding2D(padding=(1, 0), name="zero_padding")(x)
 
-    # x = CircularPadding2D(padding=(1, 0), name="padding_1")(x)
+    x = CircularPadding2D(padding=(1, 0), name="padding_1")(x)
 
-    x = QConv2D(4, (3, 3), strides=(1, 1), padding='same', kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="conv_1")(x)
+
+    x = QConv2D(4, (5, 5), strides=(1, 1), padding='same', kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="conv_1")(x)
+
 
     x = BatchNormalization(name="norm_1")(x)
     x = QActivation('quantized_relu(quantized_bits(8, 1, 1, alpha=1))', name="relu_1")(x)
     
-    x = AveragePooling2D((2, 2), name="pool_1")(x)
+    x = AveragePooling2D((3, 3), name="pool_1")(x)
 
     x = Flatten(name="flatten_1")(x)
     x = QDense(16, kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="dense_1")(x)

@@ -166,15 +166,19 @@ def build_model():
     input_tensor = Input(shape=(18, 14, 1), name="inputs")
     x=input_tensor
 
-    
+
+
     x = QActivation('quantized_relu(quantized_bits(8, 1, 1, alpha=1))', name="relu30_1")(x)
-    x = QConv2D(4, (3, 3), strides=(1, 1), padding='same', kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="conv_1")(x)
+    x = ZeroPadding2D(padding=(1, 0), name="zero_padding")(x)
+
+    x = QConv2D(4, (5, 5), strides=(1, 1), padding='same', kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="conv_1")(x)
+    # x = Cropping2D(cropping=(1, 0), name="cropping")(x)
 
     x = BatchNormalization(name="norm_1")(x)
     x = QActivation('quantized_relu(quantized_bits(8, 1, 1, alpha=1))', name="relu_1")(x)
 
     
-    x = AveragePooling2D((2, 2), name="pool_1")(x)
+    x = AveragePooling2D((3, 3), name="pool_1")(x)
 
     x = Flatten(name="flatten_1")(x)
     x = QDense(16, kernel_quantizer=quantized_bits(8, 1, 1, alpha=1), bias_quantizer=quantized_bits(8, 1, 1, alpha=1), name="dense_1")(x)
