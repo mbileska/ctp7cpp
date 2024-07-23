@@ -9,48 +9,50 @@
 
 // hls-fpga-machine-learning insert numbers
 #define N_INPUT_1_1 252
-
-
-#define OUT_HEIGHT_3 18
+#define OUT_HEIGHT_3 20
 #define OUT_WIDTH_3 14
-#define N_FILT_3 4
-#define OUT_HEIGHT_3 18
-#define OUT_WIDTH_3 14
-#define N_FILT_3 4
-#define OUT_HEIGHT_3 18
-#define OUT_WIDTH_3 14
-#define N_FILT_3 4
-#define OUT_HEIGHT_7 9
-#define OUT_WIDTH_7 7
-#define N_FILT_7 4
-#define N_SIZE_0_8 252
-#define N_LAYER_9 16
-#define N_LAYER_9 16
-#define N_LAYER_16 2
+#define N_CHAN_3 1
+#define OUT_HEIGHT_4 20
+#define OUT_WIDTH_4 14
+#define N_FILT_4 4
+#define OUT_HEIGHT_4 20
+#define OUT_WIDTH_4 14
+#define N_FILT_4 4
+#define OUT_HEIGHT_4 20
+#define OUT_WIDTH_4 14
+#define N_FILT_4 4
+#define OUT_HEIGHT_8 6
+#define OUT_WIDTH_8 4
+#define N_FILT_8 4
+#define N_SIZE_0_9 96
+#define N_LAYER_10 16
+#define N_LAYER_10 16
+#define N_LAYER_13 2
 
 // hls-fpga-machine-learning insert layer-precision
 typedef ap_uint<10> input_t;
 typedef ap_fixed<16,6> layer2_t;
 typedef ap_fixed<18,8> relu30_1_table_t;
-typedef ap_fixed<16,6> model_default_t;
 typedef ap_fixed<16,6> layer3_t;
-typedef ap_fixed<8,2> weight3_t;
-typedef ap_fixed<8,2> bias3_t;
-typedef ap_fixed<16,6> layer5_t;
+typedef ap_fixed<16,6> model_default_t;
+typedef ap_fixed<16,6> layer4_t;
+typedef ap_fixed<8,2> weight4_t;
+typedef ap_fixed<8,2> bias4_t;
+typedef ap_fixed<16,6> layer6_t;
 typedef ap_fixed<16,6> norm_1_scale_t;
 typedef ap_fixed<16,6> norm_1_bias_t;
-typedef ap_fixed<16,6> layer6_t;
-typedef ap_fixed<18,8> relu_1_table_t;
 typedef ap_fixed<16,6> layer7_t;
-typedef ap_fixed<16,6> layer9_t;
-typedef ap_fixed<8,2> weight9_t;
-typedef ap_fixed<8,2> bias9_t;
-typedef ap_uint<1> layer9_index;
-typedef ap_fixed<16,6> layer11_t;
+typedef ap_fixed<18,8> relu_1_table_t;
+typedef ap_fixed<16,6> layer8_t;
+typedef ap_fixed<16,6> layer10_t;
+typedef ap_fixed<8,2> weight10_t;
+typedef ap_fixed<8,2> bias10_t;
+typedef ap_uint<1> layer10_index;
+typedef ap_fixed<16,6> layer12_t;
 typedef ap_fixed<18,8> relu_2_table_t;
 typedef ap_fixed<16,6> result_t;
-typedef ap_fixed<8,2> weight12_t;
-typedef ap_fixed<8,2> bias12_t;
-typedef ap_uint<1> layer12_index;
+typedef ap_fixed<8,2> weight13_t;
+typedef ap_fixed<8,2> bias13_t;
+typedef ap_uint<1> layer13_index;
 
 #endif

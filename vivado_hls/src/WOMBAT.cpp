@@ -5,28 +5,24 @@
 
 void WOMBAT(
     input_t inputs[N_INPUT_1_1],
-    result_t layer12_out[N_LAYER_16]
+    result_t layer13_out[N_LAYER_16]
 ) {
 
     // hls-fpga-machine-learning insert IO
-    // #pragma HLS ARRAY_RESHAPE variable=inputs complete dim=0
-    // #pragma HLS ARRAY_PARTITION variable=layer12_out complete dim=0
-    // #pragma HLS INTERFACE ap_vld port=inputs,layer12_out 
-    // #pragma HLS DATAFLOW 
     #pragma HLS INLINE
 
 #ifndef __SYNTHESIS__
     static bool loaded_weights = false;
     if (!loaded_weights) {
         // hls-fpga-machine-learning insert load weights
-        nnet::load_weights_from_txt<weight3_t, 36>(w3, "w3.txt");
-        nnet::load_weights_from_txt<bias3_t, 4>(b3, "b3.txt");
-        nnet::load_weights_from_txt<norm_1_scale_t, 4>(s5, "s5.txt");
-        nnet::load_weights_from_txt<norm_1_bias_t, 4>(b5, "b5.txt");
-        nnet::load_weights_from_txt<weight9_t, 4032>(w9, "w9.txt");
-        nnet::load_weights_from_txt<bias9_t, 16>(b9, "b9.txt");
-        nnet::load_weights_from_txt<weight12_t, 32>(w12, "w12.txt");
-        nnet::load_weights_from_txt<bias12_t, 2>(b12, "b12.txt");
+        nnet::load_weights_from_txt<weight4_t, 100>(w3, "w4.txt");
+        nnet::load_weights_from_txt<bias4_t, 4>(b3, "b4.txt");
+        nnet::load_weights_from_txt<norm_1_scale_t, 4>(s5, "s6.txt");
+        nnet::load_weights_from_txt<norm_1_bias_t, 4>(b5, "b6.txt");
+        nnet::load_weights_from_txt<weight10_t, 1536>(w9, "w10.txt");
+        nnet::load_weights_from_txt<bias10_t, 16>(b9, "b10.txt");
+        nnet::load_weights_from_txt<weight13_t, 32>(w12, "w13.txt");
+        nnet::load_weights_from_txt<bias13_t, 2>(b12, "b13.txt");
         loaded_weights = true;
     }
 #endif
@@ -41,31 +37,35 @@ void WOMBAT(
     #pragma HLS ARRAY_PARTITION variable=layer2_out complete dim=0
     nnet::relu<input_t, layer2_t, relu_config2>(inputs, layer2_out, 1); // relu30_1
 
-    layer3_t layer3_out[OUT_HEIGHT_3*OUT_WIDTH_3*N_FILT_3];
+    layer3_t layer3_out[OUT_HEIGHT_3*OUT_WIDTH_3*N_CHAN_3];
     #pragma HLS ARRAY_PARTITION variable=layer3_out complete dim=0
-    nnet::conv_2d_cl<layer2_t, layer3_t, config3>(layer2_out, layer3_out, w3, b3); // conv_1
+    nnet::zeropad2d_cl<layer2_t, layer3_t, config3>(layer2_out, layer3_out); // zero_padding
 
-    layer5_t layer5_out[OUT_HEIGHT_3*OUT_WIDTH_3*N_FILT_3];
-    #pragma HLS ARRAY_PARTITION variable=layer5_out complete dim=0
-    nnet::normalize<layer3_t, layer5_t, config5>(layer3_out, layer5_out, s5, b5); // norm_1
+    layer4_t layer4_out[OUT_HEIGHT_4*OUT_WIDTH_4*N_FILT_4];
+    #pragma HLS ARRAY_PARTITION variable=layer4_out complete dim=0
+    nnet::conv_2d_cl<layer3_t, layer4_t, config4>(layer3_out, layer4_out, w3, b3); // conv_1
 
-    layer6_t layer6_out[OUT_HEIGHT_3*OUT_WIDTH_3*N_FILT_3];
+    layer6_t layer6_out[OUT_HEIGHT_4*OUT_WIDTH_4*N_FILT_4];
     #pragma HLS ARRAY_PARTITION variable=layer6_out complete dim=0
-    nnet::relu<layer5_t, layer6_t, relu_config6>(layer5_out, layer6_out); // relu_1
+    nnet::normalize<layer4_t, layer6_t, config6>(layer4_out, layer6_out, s5, b5); // norm_1
 
-    layer7_t layer7_out[OUT_HEIGHT_7*OUT_WIDTH_7*N_FILT_7];
+    layer7_t layer7_out[OUT_HEIGHT_4*OUT_WIDTH_4*N_FILT_4];
     #pragma HLS ARRAY_PARTITION variable=layer7_out complete dim=0
-    nnet::pooling2d_cl<layer6_t, layer7_t, config7>(layer6_out, layer7_out); // pool_1
+    nnet::relu<layer6_t, layer7_t, relu_config7>(layer6_out, layer7_out); // relu_1
 
-    auto& layer8_out = layer7_out;
-    layer9_t layer9_out[N_LAYER_9];
-    #pragma HLS ARRAY_PARTITION variable=layer9_out complete dim=0
-    nnet::dense<layer7_t, layer9_t, config9>(layer8_out, layer9_out, w9, b9); // dense_1
+    layer8_t layer8_out[OUT_HEIGHT_8*OUT_WIDTH_8*N_FILT_8];
+    #pragma HLS ARRAY_PARTITION variable=layer8_out complete dim=0
+    nnet::pooling2d_cl<layer7_t, layer8_t, config8>(layer7_out, layer8_out); // pool_1
 
-    layer11_t layer11_out[N_LAYER_9];
-    #pragma HLS ARRAY_PARTITION variable=layer11_out complete dim=0
-    nnet::relu<layer9_t, layer11_t, relu_config11>(layer9_out, layer11_out); // relu_2
+    auto& layer9_out = layer8_out;
+    layer10_t layer10_out[N_LAYER_10];
+    #pragma HLS ARRAY_PARTITION variable=layer10_out complete dim=0
+    nnet::dense<layer8_t, layer10_t, config10>(layer9_out, layer10_out, w9, b9); // dense_1
 
-    nnet::dense<layer11_t, result_t, config12>(layer11_out, layer12_out, w12, b12); // dense_out
+    layer12_t layer12_out[N_LAYER_10];
+    #pragma HLS ARRAY_PARTITION variable=layer12_out complete dim=0
+    nnet::relu<layer10_t, layer12_t, relu_config12>(layer10_out, layer12_out); // relu_2
+
+    nnet::dense<layer12_t, result_t, config13>(layer12_out, layer13_out, w12, b12); // dense_out
 
 }
