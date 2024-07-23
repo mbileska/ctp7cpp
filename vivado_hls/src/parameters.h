@@ -95,10 +95,10 @@ struct config4 : nnet::conv2d_config {
     static const unsigned min_height = 20;
     static const unsigned min_width = 14;
     static const ap_uint<filt_height * filt_width> pixels[min_height * min_width];
-    static const unsigned n_partitions = 280;
+    static const unsigned n_partitions = 3;
     static const unsigned n_pixels = out_height * out_width / n_partitions;
     template<class data_T, class CONFIG_T>
-    using fill_buffer = nnet::fill_buffer_4<data_T, CONFIG_T>;
+    using fill_buffer = nnet::fill_buffer_2<data_T, CONFIG_T>;
     typedef model_default_t accum_t;
     typedef bias4_t bias_t;
     typedef weight4_t weight_t;
