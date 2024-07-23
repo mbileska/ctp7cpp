@@ -22,14 +22,14 @@
 #include "nnet_utils/nnet_pooling_stream.h"
 
 // hls-fpga-machine-learning insert weights
-#include "weights/w3.h"
-#include "weights/b3.h"
-#include "weights/s5.h"
-#include "weights/b5.h"
-#include "weights/w9.h"
-#include "weights/b9.h"
-#include "weights/w12.h"
-#include "weights/b12.h"
+#include "weights/w4.h"
+#include "weights/b4.h"
+#include "weights/s6.h"
+#include "weights/b6.h"
+#include "weights/w10.h"
+#include "weights/b10.h"
+#include "weights/w13.h"
+#include "weights/b13.h"
 
 // hls-fpga-machine-learning insert layer-config
 // relu30_1
