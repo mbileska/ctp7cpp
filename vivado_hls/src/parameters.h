@@ -182,7 +182,7 @@ struct config8 : nnet::conv2d_config {
     static const unsigned n_partitions = 280;
     static const unsigned n_pixels = out_height * out_width / n_partitions;
     template<class data_T, class CONFIG_T>
-    using fill_buffer = nnet::fill_buffer_8<data_T, CONFIG_T>;
+    using fill_buffer = nnet::fill_buffer_2<data_T, CONFIG_T>;
     typedef model_default_t accum_t;
     typedef bias8_t bias_t;
     typedef weight8_t weight_t;
