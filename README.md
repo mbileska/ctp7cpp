@@ -9,12 +9,9 @@ A wombat, of the family Vombatidae, known for its burrowing prowess, efficiently
 
 ## Table of contents
   - [Contact Us](#Contact-Us)
-  - [Funding](#Funding)
 - [Setup Environment](#Setup-Environment)
   - [Access to Datasets](#Access-to-Datasets)
   - [Converting ROOT to H5](#Converting-ROOT-to-H5)
-  - [Profiling](#Profiling)
-- [Configuration](#Configuration)
 - [Training](#Training)
 - [Compilation](#Compilation)
 - [CTP7cpp](#CTP7cpp)
