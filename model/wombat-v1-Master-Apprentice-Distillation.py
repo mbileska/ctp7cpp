@@ -3,22 +3,18 @@ import numpy as np
 import tensorflow as tf
 from keras.optimizers import Adam
 from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.layers import Input, Conv2D, ZeroPadding2D, Cropping2D, Layer, BatchNormalization, PReLU, AveragePooling2D, Concatenate, Flatten, Dense, Dropout, Lambda, Subtract
+from tensorflow.keras.layers import Input, Conv2D, ZeroPadding2D, Layer, BatchNormalization, Activation, AveragePooling2D, Flatten, Dense, Dropout
 from tensorflow.keras.callbacks import Callback, EarlyStopping
 from qkeras.qlayers import QActivation
 from qkeras.quantizers import quantized_bits
 from tensorflow.keras import backend as K
-from keras.layers import Input, Conv2D, PReLU, BatchNormalization, Activation, AveragePooling2D, Flatten, Dense, Subtract, ReLU
-
+from keras.layers import Input
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import matplotlib.patches as patches
 import argparse
 import os
-from qkeras import QConv2D, QDense, QActivation
-from qkeras import QActivation, QConv2D, QDense, quantized_bits
-
-
+from qkeras import QConv2D, QDense
 
 class Subtract30ReLU(Layer):
     def __init__(self, **kwargs):
@@ -250,15 +246,33 @@ def build_small_model():
     model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
     return model
 
-def get_soft_targets(model, data):
-    soft_targets = model.predict(data)
+def get_soft_targets(model, data, batch_size):
+    soft_targets = model.predict(data, batch_size=batch_size)
     return soft_targets
 
-def distillation_loss(y_true, y_pred, soft_targets, temperature):
-    soft_targets = tf.constant(soft_targets, dtype=tf.float32)
-    y_pred_soft = tf.nn.softmax(y_pred / temperature)
-    y_true_soft = tf.nn.softmax(soft_targets / temperature)
-    return tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true_soft, y_pred_soft))
+def distillation_loss(soft_targets, temperature):
+    def loss(y_true, y_pred):
+        batch_size = tf.shape(y_true)[0]
+        soft_targets_batch = soft_targets[:batch_size]
+        y_pred_soft = tf.nn.softmax(y_pred / temperature)
+        y_true_soft = tf.nn.softmax(soft_targets_batch / temperature)
+
+        y_true_soft = tf.reshape(y_true_soft, tf.shape(y_pred_soft))
+        y_true = tf.reshape(y_true, tf.shape(y_pred))
+
+        # Debug prints
+        # tf.print("y_true shape:", tf.shape(y_true))
+        # tf.print("y_pred shape:", tf.shape(y_pred))
+        # tf.print("y_true_soft shape:", tf.shape(y_true_soft))
+        # tf.print("y_pred_soft shape:", tf.shape(y_pred_soft))
+
+        distillation_loss = custom_mse_with_heavy_penalty(y_true_soft, y_pred_soft)
+        supervised_loss = custom_mse_with_heavy_penalty(y_true, y_pred)
+
+        return distillation_loss + supervised_loss
+    return loss
+
+
 
 def main():
     parser = argparse.ArgumentParser(description='Train a model with specified parameters.')
@@ -267,7 +281,6 @@ def main():
     parser.add_argument('batch_size', type=int, help='Batch size')
     parser.add_argument('train', type=int, help='Train new model(s): 1-yes, 0-no')
 
-
     args = parser.parse_args()
 
     num_epochs = args.epochs
@@ -275,47 +288,46 @@ def main():
     batch_size = args.batch_size
     train = args.train
 
-
     save_path = f'metrics/modelDistillation_epochs{num_epochs}_batch{batch_size}'
     os.makedirs(save_path, exist_ok=True)
 
     cregionsl, genPhi, genEta, cregions = load_data(file_path)
     labels = calculate_labels(cregions, genPhi, genEta)
 
-    if(train==1):
+    cregions = cregions.reshape((cregions.shape[0], 18, 14, 1))
+    labels = labels.reshape((labels.shape[0], 2))
 
+    if train == 1:
         large_model = build_large_model()
         small_model = build_small_model()
         history = LossHistory(save_path)
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 
-        cregions = cregions.reshape((cregions.shape[0], 18, 14, 1))
-        labels = labels.reshape((labels.shape[0], 2))
-
-    # Train large model first to generate soft targets
         large_model.fit(cregions, labels, epochs=num_epochs, batch_size=batch_size, validation_split=0.2, callbacks=[history])
-        soft_targets = get_soft_targets(large_model, cregions)
+        soft_targets = get_soft_targets(large_model, cregions, batch_size)
+        soft_targets = tf.convert_to_tensor(soft_targets)
+
     else:
         large_model = load_model("metrics/modelMaster_epochs500_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
         small_model = load_model("metrics/modelApprentice_epochs1000_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
         history = LossHistory(save_path)
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 
-        cregions = cregions.reshape((cregions.shape[0], 18, 14, 1))
-        labels = labels.reshape((labels.shape[0], 2))
-
-        # Get soft targets from the pre-trained large model
-        soft_targets = get_soft_targets(large_model, cregions)
+        soft_targets = get_soft_targets(large_model, cregions, batch_size)
+        soft_targets = tf.convert_to_tensor(soft_targets)
 
 
-    # Distillation
     temperature = 5.0
     small_model.compile(
         optimizer=Adam(),
-        loss=lambda y_true, y_pred: distillation_loss(y_true, y_pred, soft_targets, temperature),
+        loss=distillation_loss(soft_targets, temperature),
         metrics=['accuracy']
     )
+
+    print(labels.shape)
+    print(cregions.shape)
     small_model.fit(cregions, labels, epochs=num_epochs, batch_size=batch_size, validation_split=0.2, callbacks=[history, early_stopping])
+
 
     predictions = small_model.predict(cregions[:15])
     plot_heatmaps(cregionsl, predictions, genPhi[:15], genEta[:15], labels[:15], save_path)
@@ -328,3 +340,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
