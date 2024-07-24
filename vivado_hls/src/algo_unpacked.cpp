@@ -60,7 +60,7 @@ void algo_unpacked(ap_uint<128> link_in[N_CH_IN], ap_uint<192> link_out[N_CH_OUT
 
         input_t et_calo_ad[N_INPUT_1_1];
 #pragma HLS ARRAY_RESHAPE variable=et_calo_ad complete dim=0
-        result_t WOMBAT_out[N_LAYER_17];
+        result_t WOMBAT_out[N_LAYER_16];
 #pragma HLS ARRAY_RESHAPE variable=WOMBAT_out complete dim=0
 
         regionLoop: for(int iRegion = 0; iRegion < NR_CNTR_REG; iRegion++) {
