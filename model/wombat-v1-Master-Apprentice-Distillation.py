@@ -202,7 +202,7 @@ def plot_heatmaps(cregions, predictions, genPhi, genEta, labels, save_path):
     plt.savefig(os.path.join(save_path, 'heatmaps.png'))
     plt.close()
 
-def build_large_model():
+def build_masterModel():
     input_tensor = Input(shape=(18, 14, 1), name="inputs")
     x = input_tensor
     x = Subtract30ReLU(name="relu30_1")(x)
@@ -227,7 +227,7 @@ def build_large_model():
     model.compile(optimizer='adam', loss=custom_mse_with_heavy_penalty)
     return model
 
-def build_small_model():
+def build_apprenticeModel():
     input_tensor = Input(shape=(18, 14, 1), name="inputs")
     x = input_tensor
     x = Subtract30ReLU(name="relu30_1")(x)
@@ -298,45 +298,45 @@ def main():
     labels = labels.reshape((labels.shape[0], 2))
 
     if train == 1:
-        large_model = build_large_model()
-        small_model = build_small_model()
+        masterModel = build_masterModel()
+        apprenticeModel = build_apprenticeModel()
         history = LossHistory(save_path)
-        early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+        # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 
-        large_model.fit(cregions, labels, epochs=num_epochs, batch_size=batch_size, validation_split=0.2, callbacks=[history])
-        soft_targets = get_soft_targets(large_model, cregions, batch_size)
+        masterModel.fit(cregions, labels, epochs=num_epochs, batch_size=batch_size, validation_split=0.2, callbacks=[history])
+        soft_targets = get_soft_targets(masterModel, cregions, batch_size)
         soft_targets = tf.convert_to_tensor(soft_targets)
 
     else:
-        large_model = load_model("metrics/modelMaster_epochs500_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
-        small_model = load_model("metrics/modelApprentice_epochs1000_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
+        masterModel = load_model("metrics/modelMaster_epochs500_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
+        apprenticeModel = load_model("metrics/modelApprentice_epochs1000_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
         history = LossHistory(save_path)
-        early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+        # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 
-        soft_targets = get_soft_targets(large_model, cregions, batch_size)
+        soft_targets = get_soft_targets(masterModel, cregions, batch_size)
         soft_targets = tf.convert_to_tensor(soft_targets)
 
 
     temperature = 5.0
-    small_model.compile(
+    apprenticeModel.compile(
         optimizer=Adam(),
         loss=distillation_loss(soft_targets, temperature),
         metrics=['accuracy']
     )
 
-    print(labels.shape)
-    print(cregions.shape)
-    small_model.fit(cregions, labels, epochs=num_epochs, batch_size=batch_size, validation_split=0.2, callbacks=[history, early_stopping])
+    # print(labels.shape)
+    # print(cregions.shape)
+    apprenticeModel.fit(cregions, labels, epochs=num_epochs, batch_size=batch_size, validation_split=0.2, callbacks=[history])#, early_stopping])
 
 
-    predictions = small_model.predict(cregions[:15])
+    predictions = apprenticeModel.predict(cregions[:15])
     plot_heatmaps(cregionsl, predictions, genPhi[:15], genEta[:15], labels[:15], save_path)
 
-    predictions = small_model.predict(cregions)
+    predictions = apprenticeModel.predict(cregions)
     evaluate_model(predictions, labels, save_path)
 
-    model_save_path = os.path.join(save_path, 'small_model')
-    small_model.save(model_save_path, save_format='tf')
+    model_save_path = os.path.join(save_path, 'apprenticeModel')
+    apprenticeModel.save(model_save_path, save_format='tf')
 
 if __name__ == '__main__':
     main()
