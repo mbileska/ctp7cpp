@@ -5,7 +5,7 @@
 ---
 A wombat, of the family Vombatidae, known for its burrowing prowess, efficiently uncovers hidden structures beneath the surface. 
 
-**Wide Object ML Boosted Algorithm Trigger** (WOMBAT) is designed to identify boosted jetsusing low-level Compact Muon Solenoid experiment trigger calorimeter data as input to a convolutional neural network, finding boosted jet substructures in Large Hadron Collider proton-proton collisions, while leveraging Quantization Aware Training and Knowledge Distillation for sub-500ns inference on Field-Programmable Gate Arrays."
+**Wide Object ML Boosted Algorithm Trigger** (WOMBAT) is designed to identify boosted jets using low-level calorimeter data from the Compact Muon Solenoid (CMS) experiment trigger system. This process employs a convolutional neural network to discern boosted jet substructures in proton-proton collisions at the Large Hadron Collider (LHC). WOMBAT integrates Quantization Aware Training to achieve sub-500 nanosecond inference latency on Field-Programmable Gate Arrays (FPGAs).
 
 ## Table of contents
   - [Contact Us](#Contact-Us)
