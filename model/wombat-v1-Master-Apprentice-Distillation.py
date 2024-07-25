@@ -270,7 +270,8 @@ def main():
     parser.add_argument('h5_filename', type=str, help='Path to the H5 file')
     parser.add_argument('epochs', type=int, help='Number of epochs')
     parser.add_argument('batch_size', type=int, help='Batch size')
-    parser.add_argument('train', type=int, help='Train new model(s): 1-yes, 0-no')
+    parser.add_argument('train', type=int, help='Train new model(s): 1-yes, 0-no, 2-train only apprentice')
+
 
     args = parser.parse_args()
 
@@ -296,10 +297,15 @@ def main():
         soft_targets = get_soft_targets(masterModel, cregions, batch_size)
         soft_targets = tf.convert_to_tensor(soft_targets)
 
+    if train==2:
+        masterModel = load_model("metrics/modelMaster_epochs500_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
+        apprenticeModel = build_apprenticeModel()
+        history = LossHistory(save_path)
+        soft_targets = get_soft_targets(masterModel, cregions, batch_size)
+        soft_targets = tf.convert_to_tensor(soft_targets)
     else:
         masterModel = load_model("metrics/modelMaster_epochs500_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
-        # apprenticeModel = load_model("metrics/modelApprentice_epochs1000_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
-        apprenticeModel = build_apprenticeModel()
+        apprenticeModel = load_model("metrics/modelApprentice_epochs1000_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
         history = LossHistory(save_path)
         soft_targets = get_soft_targets(masterModel, cregions, batch_size)
         soft_targets = tf.convert_to_tensor(soft_targets)
