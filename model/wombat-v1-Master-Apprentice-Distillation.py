@@ -4,7 +4,8 @@ import tensorflow as tf
 from keras.optimizers import Adam
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.layers import Input, Conv2D, ZeroPadding2D, Layer, BatchNormalization, Activation, AveragePooling2D, Flatten, Dense, Dropout
-from tensorflow.keras.callbacks import Callback, EarlyStopping
+from tensorflow.keras.callbacks import Callback, EarlyStopping, ModelCheckpoint
+
 from qkeras.qlayers import QActivation
 from qkeras.quantizers import quantized_bits
 from tensorflow.keras import backend as K
@@ -15,6 +16,8 @@ import matplotlib.patches as patches
 import argparse
 import os
 from qkeras import QConv2D, QDense
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
 
 class Subtract30ReLU(Layer):
     def __init__(self, **kwargs):
@@ -250,28 +253,16 @@ def get_soft_targets(model, data, batch_size):
     soft_targets = model.predict(data, batch_size=batch_size)
     return soft_targets
 
-def distillation_loss(soft_targets, temperature):
+def distillation_loss(soft_targets, temperature, alpha=0.5):
     def loss(y_true, y_pred):
-        batch_size = tf.shape(y_true)[0]
-        soft_targets_batch = soft_targets[:batch_size]
         y_pred_soft = tf.nn.softmax(y_pred / temperature)
-        y_true_soft = tf.nn.softmax(soft_targets_batch / temperature)
+        y_true_soft = tf.nn.softmax(soft_targets[:tf.shape(y_true)[0]] / temperature)
 
-        y_true_soft = tf.reshape(y_true_soft, tf.shape(y_pred_soft))
-        y_true = tf.reshape(y_true, tf.shape(y_pred))
+        distillation_loss = tf.keras.losses.KLD(y_true_soft, y_pred_soft) * (temperature ** 2)
+        supervised_loss = tf.keras.losses.MSE(y_true, y_pred)
 
-        # Debug prints
-        # tf.print("y_true shape:", tf.shape(y_true))
-        # tf.print("y_pred shape:", tf.shape(y_pred))
-        # tf.print("y_true_soft shape:", tf.shape(y_true_soft))
-        # tf.print("y_pred_soft shape:", tf.shape(y_pred_soft))
-
-        distillation_loss = custom_mse_with_heavy_penalty(y_true_soft, y_pred_soft)
-        supervised_loss = custom_mse_with_heavy_penalty(y_true, y_pred)
-
-        return distillation_loss + supervised_loss
+        return alpha * supervised_loss + (1 - alpha) * distillation_loss
     return loss
-
 
 
 def main():
@@ -301,33 +292,54 @@ def main():
         masterModel = build_masterModel()
         apprenticeModel = build_apprenticeModel()
         history = LossHistory(save_path)
-        # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-
         masterModel.fit(cregions, labels, epochs=num_epochs, batch_size=batch_size, validation_split=0.2, callbacks=[history])
         soft_targets = get_soft_targets(masterModel, cregions, batch_size)
         soft_targets = tf.convert_to_tensor(soft_targets)
 
     else:
         masterModel = load_model("metrics/modelMaster_epochs500_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
-        apprenticeModel = load_model("metrics/modelApprentice_epochs1000_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
+        # apprenticeModel = load_model("metrics/modelApprentice_epochs1000_batch32/model", custom_objects={'Subtract30ReLU': Subtract30ReLU, 'CircularPadding2D': CircularPadding2D, 'custom_mse_with_heavy_penalty': custom_mse_with_heavy_penalty})
+        apprenticeModel = build_apprenticeModel()
         history = LossHistory(save_path)
-        # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-
         soft_targets = get_soft_targets(masterModel, cregions, batch_size)
         soft_targets = tf.convert_to_tensor(soft_targets)
 
-
     temperature = 5.0
+    alpha = 0.5
+
+    # Data augmentation
+    datagen = ImageDataGenerator(
+        rotation_range=10,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        horizontal_flip=True
+    )
+    train_generator = datagen.flow(cregions, labels, batch_size=batch_size)
+
+    # Learning rate schedule
+    initial_learning_rate = 0.001
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+        initial_learning_rate, decay_steps=10000, decay_rate=0.9, staircase=True
+    )
+    optimizer = Adam(learning_rate=lr_schedule)
+
+    # Compile apprentice model
     apprenticeModel.compile(
-        optimizer=Adam(),
-        loss=distillation_loss(soft_targets, temperature),
+        optimizer=optimizer,
+        loss=distillation_loss(soft_targets, temperature, alpha),
         metrics=['accuracy']
     )
 
-    # print(labels.shape)
-    # print(cregions.shape)
-    apprenticeModel.fit(cregions, labels, epochs=num_epochs, batch_size=batch_size, validation_split=0.2, callbacks=[history])#, early_stopping])
+    # Callbacks for early stopping and model checkpointing
+    early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+    checkpoint = ModelCheckpoint('best_model.h5', monitor='val_loss', save_best_only=True)
 
+    apprenticeModel.fit(
+        train_generator,
+        epochs=num_epochs,
+        validation_data=(cregions, labels),
+        callbacks=[history, checkpoint]#early_stopping,
+    )
 
     predictions = apprenticeModel.predict(cregions[:15])
     plot_heatmaps(cregionsl, predictions, genPhi[:15], genEta[:15], labels[:15], save_path)
@@ -340,4 +352,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
