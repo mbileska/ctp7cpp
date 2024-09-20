@@ -10,7 +10,7 @@
 // Prototype of top level function for C-synthesis
 void WOMBAT(
     input_t inputs[N_INPUT_1_1],
-    result_t layer11_out[N_LAYER_16]
+    result_t layer13_out[N_LAYER_16]
 );
 
 #endif
